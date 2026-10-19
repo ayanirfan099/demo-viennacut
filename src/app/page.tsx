@@ -1,69 +1,107 @@
-import Image from "next/image";
 
-export default function Home() {
+import Link from "next/link";
+
+const services = [
+  {
+    name: "Classic Haircut",
+    description: "A precise cut tailored to your style.",
+    price: "€28",
+  },
+  {
+    name: "Beard Trim",
+    description: "Clean lines and expert beard shaping.",
+    price: "€18",
+  },
+  {
+    name: "Haircut & Beard",
+    description: "The complete grooming experience.",
+    price: "€40",
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-[#FAF9F6] text-[#171717]">
+      <header className="border-b border-stone-200">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <Link href="/" className="text-xl font-bold tracking-tight">
+            VIENNA <span className="text-[#AD8252]">CUTS.</span>
+          </Link>
+
+          <span className="text-sm text-stone-500">
+            Vienna, Austria
+          </span>
+        </nav>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-6 py-24 md:py-36">
+        <div className="max-w-3xl">
+          <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-[#AD8252]">
+            Traditional Craft. Modern Style.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+            Look sharp.
+            <br />
+            Feel confident.
+          </h1>
+
+          <p className="mt-8 max-w-xl text-lg leading-relaxed text-stone-600">
+            Quality haircuts, expert beard grooming, and a
+            barbershop experience made for you. Right here
+            in Vienna.
+          </p>
+
+          <Link
+            href="#services"
+            className="mt-10 inline-block rounded-md bg-[#171717] px-8 py-4 font-medium text-white transition hover:bg-[#AD8252]"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Explore Our Services
+          </Link>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section
+        id="services"
+        className="border-t border-stone-200 bg-white py-20"
+      >
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#AD8252]">
+            What We Offer
+          </p>
+
+          <h2 className="mt-4 text-4xl font-bold">
+            Our Services
+          </h2>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {services.map((service) => (
+              <article
+                key={service.name}
+                className="rounded-lg border border-stone-200 p-8"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <h3 className="text-xl font-semibold">
+                    {service.name}
+                  </h3>
+                  <span className="font-semibold text-[#AD8252]">
+                    {service.price}
+                  </span>
+                </div>
+
+                <p className="mt-4 text-stone-600">
+                  {service.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-stone-200 px-6 py-8 text-center text-sm text-stone-500">
+        © {new Date().getFullYear()} Vienna Cuts.
+        Demo website for portfolio purposes.
+      </footer>
+    </main>
   );
 }
