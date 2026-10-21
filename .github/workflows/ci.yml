@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - "feature/**"
+      - "fix/**"
   pull_request:
     branches:
       - main
@@ -17,6 +18,24 @@ jobs:
   quality-checks:
     name: TypeScript, Lint, Tests and Build
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: vienna_test
+          POSTGRES_PASSWORD: vienna_test_password
+          POSTGRES_DB: vienna_cuts_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vienna_test -d vienna_cuts_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://vienna_test:vienna_test_password@localhost:5432/vienna_cuts_test?schema=public
 
     steps:
       - name: Checkout repository
@@ -32,12 +51,16 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma Client
-        run: npx prisma generate
-        env:
-          DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5432/placeholder"
+        run: npm run prisma:generate
+
+      - name: Apply database migrations
+        run: npm run prisma:migrate
+
+      - name: Seed test database
+        run: npm run prisma:seed
 
       - name: Check TypeScript
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run ESLint
         run: npm run lint
@@ -45,7 +68,8 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
+      - name: Run database integration tests
+        run: npm run test:integration
+
       - name: Build application
         run: npm run build
-        env:
-          DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5432/placeholder"

@@ -5,8 +5,10 @@
   --background: #faf9f6;
   --foreground: #171717;
   --surface: #ffffff;
-  --accent: #ad8252;
-  --muted: #666666;
+  --accent: #7a5630;
+  --accent-hover: #634526;
+  --accent-light: #c49a65;
+  --muted: #57534e;
   --border: #e7e5e4;
 }
 
@@ -17,6 +19,8 @@
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-accent-light: var(--accent-light);
+  --color-accent-hover: var(--accent-hover);
 }
 
 html {

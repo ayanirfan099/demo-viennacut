@@ -10,7 +10,7 @@ export default function BookingCTA() {
     >
       <Container>
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#C49A65]">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent-light">
             Your Next Look Starts Here
           </p>
 
@@ -27,7 +27,7 @@ export default function BookingCTA() {
           <div className="mt-10">
             <Link
               href="/#services"
-              className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-8 py-4 text-sm font-semibold text-white transition hover:bg-[#947047]"
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-8 py-4 text-sm font-semibold text-white transition hover:bg-accent-hover"
             >
               Explore Our Services
               <span className="ml-3" aria-hidden="true">
@@ -36,7 +36,7 @@ export default function BookingCTA() {
             </Link>
           </div>
 
-          <p className="mt-6 text-xs text-stone-400">
+          <p className="mt-6 text-xs text-stone-300">
             Online booking is currently under development.
           </p>
         </div>
