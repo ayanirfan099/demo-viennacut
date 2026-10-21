@@ -43,7 +43,8 @@ function requiredString(
 }
 
 export function validateBookingRequest(
-  input: unknown
+  input: unknown,
+  now: Date = new Date()
 ): BookingValidationResult {
   const errors: string[] = [];
 
@@ -78,6 +79,17 @@ export function validateBookingRequest(
 
     if (!Number.isFinite(startsAt.getTime())) {
       errors.push("startsAt is invalid");
+    } else {
+      const maxBookingDate = new Date(now.getTime());
+      maxBookingDate.setUTCDate(maxBookingDate.getUTCDate() + 90);
+
+      if (startsAt.getTime() <= now.getTime()) {
+        errors.push("startsAt must be in the future");
+      }
+
+      if (startsAt.getTime() > maxBookingDate.getTime()) {
+        errors.push("startsAt cannot be more than 90 days ahead");
+      }
     }
   }
 
