@@ -4,6 +4,19 @@
 :root {
   --background: #faf9f6;
   --foreground: #171717;
+  --surface: #ffffff;
+  --accent: #ad8252;
+  --muted: #666666;
+  --border: #e7e5e4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
 }
 
 html {
