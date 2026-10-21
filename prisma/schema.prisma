@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model Service {
+  id              String  @id @default(cuid())
+  name            String
+  description     String?
+  priceCents      Int
+  durationMinutes Int
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Barber {
+  id       String  @id @default(cuid())
+  name     String
+  bio      String?
+  imageUrl String?
+  isActive Boolean @default(true)
+
+  appointments Appointment[]
+  workingHours WorkingHour[]
+  blockedTimes BlockedTime[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id    String  @id @default(cuid())
+  name  String
+  email String?
+  phone String?
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Appointment {
+  id String @id @default(cuid())
+
+  customerId String
+  barberId   String
+  serviceId  String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  barber   Barber   @relation(fields: [barberId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+
+  // Store timestamps as UTC instants.
+  startsAt DateTime
+  endsAt   DateTime
+
+  // Snapshot values at booking time.
+  priceCents      Int
+  durationMinutes Int
+
+  status        AppointmentStatus @default(PENDING)
+  customerNotes String?
+  internalNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([barberId, startsAt])
+  @@index([customerId])
+  @@index([status, startsAt])
+}
+
+model WorkingHour {
+  id       String @id @default(cuid())
+  barberId String
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  dayOfWeek Int
+
+  // Minutes since local midnight in Europe/Vienna.
+  startMinute Int
+  endMinute   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([barberId, dayOfWeek])
+}
+
+model BlockedTime {
+  id       String @id @default(cuid())
+  barberId String
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  startsAt DateTime
+  endsAt   DateTime
+  reason   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([barberId, startsAt])
+}

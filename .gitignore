@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Generated Prisma Client
+/src/generated/prisma/
+
+# Prisma initialization assistant files
+/.agents/
+/.claude/
+/.windsurf/
+/skills-lock.json
