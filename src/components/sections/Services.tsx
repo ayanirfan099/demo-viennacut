@@ -33,7 +33,7 @@ export default function Services() {
                   0{index + 1}
                 </span>
 
-                <span className="text-xs uppercase tracking-wider text-stone-400">
+                <span className="text-xs uppercase tracking-wider text-stone-600">
                   Grooming
                 </span>
               </div>

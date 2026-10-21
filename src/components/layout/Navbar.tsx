@@ -27,7 +27,7 @@ export default function Navbar() {
           onClick={closeMenu}
           className="text-xl font-bold tracking-tight"
         >
-          VIENNA <span className="text-accent">CUTS.</span>
+          VIENNA <span className="text-accent-light">CUTS.</span>
         </Link>
 
         {/* Desktop navigation */}
@@ -39,7 +39,7 @@ export default function Navbar() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm text-stone-300 transition hover:text-accent"
+              className="text-sm text-stone-300 transition hover:text-accent-light"
             >
               {item.name}
             </Link>
@@ -47,7 +47,7 @@ export default function Navbar() {
 
           <Link
             href="/#booking"
-            className="rounded-md bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#947047]"
+            className="rounded-md bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-hover"
           >
             Booking Info
           </Link>
@@ -90,7 +90,7 @@ export default function Navbar() {
             <Link
               href="/#booking"
               onClick={closeMenu}
-              className="rounded-md bg-accent px-5 py-3 text-center text-sm font-semibold text-white"
+              className="rounded-md bg-accent px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-accent-hover"
             >
               Booking Info
             </Link>
