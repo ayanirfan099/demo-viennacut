@@ -1,33 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type {
+  AvailabilitySlot,
+  AvailabilityResponse,
+} from "@/lib/booking/api-types";
 
 type DateTimeSelectionProps = {
+  serviceId: string;
+  barberId: string;
   onBack: () => void;
-  onContinue: (date: string, time: string) => void;
+  onContinue: (date: string, startsAt: string) => void;
 };
 
-const demoTimes = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-];
-
 export default function DateTimeSelection({
+  serviceId,
+  barberId,
   onBack,
   onContinue,
 }: DateTimeSelectionProps) {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<AvailabilitySlot[]>([]);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedDate || !serviceId || !barberId) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadAvailability() {
+      setIsLoadingAvailability(true);
+
+      try {
+        const params = new URLSearchParams({
+          serviceId,
+          barberId,
+          date: selectedDate,
+        });
+
+        const response = await fetch(
+          `/api/availability?${params.toString()}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load available appointment times.");
+        }
+
+        const data: AvailabilityResponse = await response.json();
+
+        if (controller.signal.aborted) return;
+
+        setAvailableSlots(data.slots);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        setAvailabilityError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load available appointment times."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingAvailability(false);
+        }
+      }
+    }
+
+    void loadAvailability();
+
+    return () => controller.abort();
+  }, [selectedDate, serviceId, barberId]);
 
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Vienna",
@@ -69,6 +116,9 @@ export default function DateTimeSelection({
           onChange={(event) => {
             setSelectedDate(event.target.value);
             setSelectedTime("");
+            setAvailableSlots([]);
+            setAvailabilityError(null);
+            setIsLoadingAvailability(Boolean(event.target.value));
           }}
           className="mt-3 w-full rounded-md border border-border bg-surface px-4 py-3 sm:max-w-xs"
         />
@@ -81,24 +131,48 @@ export default function DateTimeSelection({
           </h3>
 
           <p className="mt-2 text-sm text-muted">
-            Demo times only — real availability will be connected later.
-            Times are shown in Vienna local time.
+            All appointment times are shown in Vienna local time
+            (Europe/Vienna).
           </p>
 
+          {isLoadingAvailability && (
+            <p role="status" className="mt-5 text-sm text-muted">
+              Checking available appointment times...
+            </p>
+          )}
+
+          {availabilityError && (
+            <p
+              role="alert"
+              className="mt-5 rounded-md border border-red-500 p-4 text-sm text-red-600"
+            >
+              {availabilityError}
+            </p>
+          )}
+
+          {!isLoadingAvailability &&
+            !availabilityError &&
+            availableSlots.length === 0 && (
+              <p role="status" className="mt-5 text-sm text-muted">
+                No appointments are available on this date.
+                Please choose another date.
+              </p>
+            )}
+
           <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {demoTimes.map((time) => (
+            {availableSlots.map((slot) => (
               <button
-                key={time}
+                key={slot.startsAt}
                 type="button"
-                aria-pressed={selectedTime === time}
-                onClick={() => setSelectedTime(time)}
+                aria-pressed={selectedTime === slot.startsAt}
+                onClick={() => setSelectedTime(slot.startsAt)}
                 className={`cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
-                  selectedTime === time
+                  selectedTime === slot.startsAt
                     ? "border-accent bg-accent/10 font-semibold"
                     : "border-border bg-surface hover:border-accent"
                 }`}
               >
-                {time}
+                {slot.localTime}
               </button>
             ))}
           </div>
@@ -116,7 +190,14 @@ export default function DateTimeSelection({
 
         <button
           type="button"
-          disabled={!selectedDate || !selectedTime || selectedDate < minDate}
+          disabled={
+            !selectedDate ||
+            !selectedTime ||
+            selectedDate < minDate ||
+            isLoadingAvailability ||
+            Boolean(availabilityError) ||
+            !availableSlots.some((slot) => slot.startsAt === selectedTime)
+          }
           onClick={() => onContinue(selectedDate, selectedTime)}
           className="cursor-pointer rounded-md bg-foreground px-7 py-3 font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
         >
