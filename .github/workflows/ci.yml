@@ -72,4 +72,8 @@ jobs:
         run: npm run test:integration
 
       - name: Build application
-        run: npm run build
+        env:
+          BETTER_AUTH_URL: http://localhost:3000
+        run: |
+          export BETTER_AUTH_SECRET="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(48).toString("base64url"))')"
+          npm run build
