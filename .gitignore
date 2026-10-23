@@ -57,3 +57,6 @@ next-env.d.ts
 /.claude/
 /.windsurf/
 /skills-lock.json
+
+# Local source-review archive; do not publish with the repository.
+/vienna-cuts-m4-codex-audit.zip
