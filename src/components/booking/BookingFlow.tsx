@@ -2,290 +2,288 @@
 
 import { useEffect, useState } from "react";
 import type { ApiService, ApiBarber } from "@/lib/booking/api-types";
-import DateTimeSelection from "@/components/booking/DateTimeSelection";
-import CustomerDetails from "@/components/booking/CustomerDetails";
-
-const steps = ["Service", "Barber", "Date & Time", "Details"];
+import { useLanguage } from "@/components/site/LanguageProvider";
+import { formatPrice, serviceCopy } from "./booking-copy";
+import DateTimeSelection from "./DateTimeSelection";
+import CustomerDetails, { type Customer } from "./CustomerDetails";
 
 export default function BookingFlow() {
-  const [apiServices, setApiServices] = useState<ApiService[]>([]);
-  const [apiBarbers, setApiBarbers] = useState<ApiBarber[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null
-  );
-  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(
-    null
-  );
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-
+  const { language, t } = useLanguage();
+  const [services, setServices] = useState<ApiService[]>([]);
+  const [barbers, setBarbers] = useState<ApiBarber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [serviceId, setServiceId] = useState("");
+  const [barberId, setBarberId] = useState("");
+  const [assignedBarber, setAssignedBarber] = useState("");
+  const [step, setStep] = useState(0);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [customer, setCustomer] = useState<Customer>({
+    name: "",
+    email: "",
+    phone: "",
+  });
   useEffect(() => {
     const controller = new AbortController();
-
-    async function loadBookingOptions() {
-      setIsLoading(true);
-      setLoadError(null);
-
+    async function load() {
+      setLoading(true);
+      setLoadError(false);
       try {
-        const [servicesResponse, barbersResponse] = await Promise.all([
-          fetch("/api/services", { signal: controller.signal }),
-          fetch("/api/barbers", { signal: controller.signal }),
-        ]);
-
-        if (!servicesResponse.ok || !barbersResponse.ok) {
-          throw new Error("Unable to load booking options.");
-        }
-
-        const servicesData: { services: ApiService[] } =
-          await servicesResponse.json();
-        const barbersData: { barbers: ApiBarber[] } =
-          await barbersResponse.json();
-
-        if (controller.signal.aborted) return;
-
-        setApiServices(servicesData.services);
-        setApiBarbers(barbersData.barbers);
-      } catch (error) {
-        if (controller.signal.aborted) return;
-
-        setLoadError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load booking options."
+        const responses = await Promise.all(
+          ["/api/services", "/api/barbers"].map((url) =>
+            fetch(url, { signal: controller.signal }),
+          ),
         );
+        if (responses.some((response) => !response.ok))
+          throw Error("Options unavailable");
+        const [serviceData, barberData] = await Promise.all(
+          responses.map((response) => response.json()),
+        );
+        if (controller.signal.aborted) return;
+        setServices(serviceData.services);
+        setBarbers(barberData.barbers);
+        const query = new URLSearchParams(window.location.search);
+        const requestedService = query.get("service") ?? query.get("serviceId");
+        const requestedBarber = query.get("barber") ?? query.get("barberId");
+        if (
+          serviceData.services.some(
+            (s: ApiService) => s.id === requestedService,
+          )
+        )
+          setServiceId(requestedService!);
+        if (barberData.barbers.some((b: ApiBarber) => b.id === requestedBarber))
+          setBarberId(requestedBarber!);
+      } catch {
+        if (!controller.signal.aborted) setLoadError(true);
       } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
-
-    void loadBookingOptions();
-
+    void load();
     return () => controller.abort();
-  }, []);
-
-  const selectedService = apiServices.find(
-    (service) => service.id === selectedServiceId
+  }, [retry]);
+  const service = services.find((s) => s.id === serviceId);
+  const barber = barbers.find(
+    (b) => b.id === assignedBarber || (barberId !== "any" && b.id === barberId),
   );
-
+  const steps = [
+    t("Behandlung", "Service"),
+    t("Barber", "Barber"),
+    t("Termin", "Date & time"),
+    t("Details & Prüfung", "Details & review"),
+  ];
+  const clearSlot = () => {
+    setDate("");
+    setTime("");
+    setAssignedBarber("");
+  };
+  const button =
+    "rounded-md bg-foreground px-7 py-3 font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed";
+  const card =
+    "w-full rounded-lg border bg-surface p-5 text-left transition-colors sm:p-6";
   return (
-    <div>
-      {isLoading && (
-        <p role="status" className="mt-6 text-sm text-muted">
-          Loading booking options...
-        </p>
-      )}
-
-      {loadError && (
-        <p role="alert" className="mt-6 rounded-md border border-red-500 p-4 text-sm text-red-600">
-          {loadError}
-        </p>
-      )}
-
+    <div className="mt-10">
       <ol
-        aria-label="Booking progress"
-        className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4"
+        aria-label={t("Buchungsfortschritt", "Booking progress")}
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
       >
-        {steps.map((step, index) => (
+        {steps.map((label, i) => (
           <li
-            key={step}
-            aria-current={index === currentStep ? "step" : undefined}
-            className={`rounded-md border px-3 py-3 text-center text-sm ${
-              index === currentStep
-                ? "border-accent bg-accent/10 font-semibold"
-                : "border-border text-muted"
-            }`}
+            key={i}
+            aria-current={step === i ? "step" : undefined}
+            className={`border-b-2 px-2 py-4 text-sm ${step === i ? "border-accent font-semibold" : "border-border text-muted"}`}
           >
-            {index + 1}. {step}
+            <span className="mr-2">0{i + 1}</span>
+            {label}
           </li>
         ))}
       </ol>
-
-      {currentStep === 0 ? (
-        <section aria-labelledby="service-heading" className="mt-12">
-          <h2 id="service-heading" className="text-2xl font-semibold">
-            Select a service
-          </h2>
-
-          <p className="mt-2 text-muted">
-            Explore our grooming services.
+      {loading && (
+        <p role="status" className="py-10 text-muted">
+          {t("Buchungsoptionen werden geladen …", "Loading booking options …")}
+        </p>
+      )}
+      {loadError && (
+        <div role="alert" className="mt-8 border border-accent p-6">
+          <p>
+            {t(
+              "Die Online-Buchung ist gerade nicht erreichbar. Es wurde kein Termin angelegt.",
+              "Online booking is currently unavailable. No appointment has been created.",
+            )}
           </p>
-
-          {!isLoading && !loadError && apiServices.length === 0 && (
-            <p role="status" className="mt-6 text-sm text-muted">
-              No services are currently available for booking.
-            </p>
-          )}
-
-          <div className="mt-6 space-y-4">
-            {apiServices.map((service) => {
-              const isSelected = selectedServiceId === service.id;
-
-              return (
-                <button
-                  key={service.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    if (selectedServiceId !== service.id) {
-                      setSelectedServiceId(service.id);
-                      setSelectedDate("");
-                      setSelectedTime("");
-                    }
-                  }}
-                  className={`w-full cursor-pointer rounded-lg border bg-surface p-6 text-left transition-colors ${
-                    isSelected
-                      ? "border-accent ring-2 ring-accent/30"
-                      : "border-border hover:border-accent"
-                  }`}
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {service.name}
-                      </h3>
-
-                      <p className="mt-2 text-sm text-muted">
-                        {service.description}
-                      </p>
-
-                      <p className="mt-3 text-sm text-muted">
-                        {service.durationMinutes} minutes
-                      </p>
-                    </div>
-
-                    <p className="text-xl font-semibold">
-                      €{(service.priceCents / 100).toFixed(2)}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {selectedService && (
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted" aria-live="polite">
-                Selected: {selectedService.name}
+          <button
+            className="mt-4 underline"
+            onClick={() => setRetry((n) => n + 1)}
+          >
+            {t("Erneut versuchen", "Try again")}
+          </button>
+        </div>
+      )}
+      {!loading && !loadError && (
+        <>
+          {step === 0 && (
+            <section className="mt-10" aria-labelledby="service-heading">
+              <h2 id="service-heading" className="text-2xl font-semibold">
+                {t("Dein Look beginnt hier.", "Your look starts here.")}
+              </h2>
+              <p className="mt-2 text-muted">
+                {t(
+                  "Wähle deine Behandlung. Preise und Dauer stammen aus unserem Buchungssystem.",
+                  "Choose your treatment. Prices and durations come from our booking system.",
+                )}
               </p>
-
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className="cursor-pointer rounded-md bg-foreground px-7 py-3 font-medium text-white transition-colors hover:bg-accent"
-              >
-                Continue
-              </button>
-            </div>
-          )}
-        </section>
-      ) : currentStep === 1 ? (
-        <section aria-labelledby="barber-heading" className="mt-12">
-          <h2 id="barber-heading" className="text-2xl font-semibold">
-            Select a barber
-          </h2>
-
-          <p className="mt-2 text-muted">
-            Choose the barber you would like to book with.
-          </p>
-
-          <p className="mt-4 text-sm text-muted">
-            Selected service: <strong>{selectedService?.name}</strong>
-          </p>
-
-          {!isLoading && !loadError && apiBarbers.length === 0 && (
-            <p role="status" className="mt-6 text-sm text-muted">
-              No barbers are currently available for booking.
-            </p>
-          )}
-
-          <div className="mt-6 space-y-4">
-            {apiBarbers.map((barber) => {
-              const isSelected = selectedBarberId === barber.id;
-
-              return (
+              {!services.length && (
+                <p role="status" className="mt-6">
+                  {t(
+                    "Aktuell sind keine Behandlungen buchbar.",
+                    "No treatments are currently available.",
+                  )}
+                </p>
+              )}
+              <div className="mt-6 space-y-3">
+                {services.map((s) => {
+                  const copy = serviceCopy(s, language);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      aria-pressed={serviceId === s.id}
+                      onClick={() => {
+                        if (serviceId !== s.id) {
+                          setServiceId(s.id);
+                          clearSlot();
+                        }
+                      }}
+                      className={`${card} ${serviceId === s.id ? "border-accent ring-1 ring-accent" : "border-border hover:border-accent"}`}
+                    >
+                      <div className="flex justify-between gap-4">
+                        <h3 className="text-lg font-semibold">{copy.name}</h3>
+                        <span className="shrink-0 font-semibold">
+                          {formatPrice(s.priceCents, language)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-muted">
+                        {copy.description}
+                      </p>
+                      <p className="mt-3 text-sm">{s.durationMinutes} min</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-8 flex justify-end">
                 <button
-                  key={barber.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    if (selectedBarberId !== barber.id) {
-                      setSelectedBarberId(barber.id);
-                      setSelectedDate("");
-                      setSelectedTime("");
-                    }
-                  }}
-                  className={`w-full cursor-pointer rounded-lg border bg-surface p-6 text-left transition-colors ${
-                    isSelected
-                      ? "border-accent ring-2 ring-accent/30"
-                      : "border-border hover:border-accent"
-                  }`}
+                  className={button}
+                  disabled={!service}
+                  onClick={() => setStep(1)}
                 >
-                  <h3 className="text-lg font-semibold">{barber.name}</h3>
-                  <p className="mt-2 text-sm text-muted">{barber.bio}</p>
+                  {t("Weiter", "Continue")} →
                 </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-8 flex items-center justify-between gap-4">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(0)}
-              className="cursor-pointer rounded-md border border-border px-6 py-3 font-medium hover:border-accent"
-            >
-              Back
-            </button>
-
-            <button
-              type="button"
-              disabled={!selectedBarberId}
-              onClick={() => setCurrentStep(2)}
-              className="cursor-pointer rounded-md bg-foreground px-7 py-3 font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Continue
-            </button>
-          </div>
-        </section>
-      ) : currentStep === 2 ? (
-        <DateTimeSelection
-          key={`${selectedServiceId}-${selectedBarberId}`}
-          serviceId={selectedServiceId ?? ""}
-          barberId={selectedBarberId ?? ""}
-          onBack={() => setCurrentStep(1)}
-          onContinue={(date, startsAt) => {
-            setSelectedDate(date);
-            setSelectedTime(startsAt);
-            setCurrentStep(3);
-          }}
-        />
-      ) : (
-        <CustomerDetails
-          serviceId={selectedServiceId ?? ""}
-          barberId={selectedBarberId ?? ""}
-          startsAt={selectedTime}
-          serviceName={selectedService?.name ?? ""}
-          barberName={
-            apiBarbers.find((barber) => barber.id === selectedBarberId)?.name ?? ""
-          }
-          date={selectedDate}
-          time={
-            selectedTime
-              ? new Intl.DateTimeFormat("en-GB", {
-                  timeZone: "Europe/Vienna",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hourCycle: "h23",
-                }).format(new Date(selectedTime))
-              : ""
-          }
-          onBack={() => setCurrentStep(2)}
-        />
+              </div>
+            </section>
+          )}
+          {step === 1 && (
+            <section className="mt-10" aria-labelledby="barber-heading">
+              <h2 id="barber-heading" className="text-2xl font-semibold">
+                {t("In guten Händen.", "In good hands.")}
+              </h2>
+              <p className="mt-2 text-muted">
+                {t(
+                  "Wähle deinen Barber oder die nächste freie Möglichkeit.",
+                  "Choose your barber or any available team member.",
+                )}
+              </p>
+              <div className="mt-6 space-y-3">
+                {[
+                  {
+                    id: "any",
+                    name: t("Alle verfügbaren Barber", "Any available barber"),
+                  },
+                  ...barbers,
+                ].map((b) => (
+                  <button
+                    key={b.id}
+                    aria-pressed={barberId === b.id}
+                    className={`${card} ${barberId === b.id ? "border-accent ring-1 ring-accent" : "border-border hover:border-accent"}`}
+                    onClick={() => {
+                      if (barberId !== b.id) {
+                        setBarberId(b.id);
+                        clearSlot();
+                      }
+                    }}
+                  >
+                    <span className="text-lg font-semibold">{b.name}</span>
+                    <p className="mt-2 text-sm text-muted">
+                      {b.id === "any"
+                        ? t(
+                            "Wir zeigen freie Zeiten im gesamten Team.",
+                            "See available times across the whole team.",
+                          )
+                        : t(
+                            "Demo-Team · Individuelle Beratung und präzises Handwerk.",
+                            "Demo team · Individual consultation and precise craftsmanship.",
+                          )}
+                    </p>
+                  </button>
+                ))}
+              </div>
+              {!barbers.length && (
+                <p role="status" className="mt-4">
+                  {t(
+                    "Aktuell ist kein Barber verfügbar.",
+                    "No barbers are currently available.",
+                  )}
+                </p>
+              )}
+              <div className="mt-8 flex justify-between gap-3">
+                <button
+                  className="rounded-md border border-border px-6 py-3"
+                  onClick={() => setStep(0)}
+                >
+                  {t("Zurück", "Back")}
+                </button>
+                <button
+                  className={button}
+                  disabled={!barberId || !barbers.length}
+                  onClick={() => setStep(2)}
+                >
+                  {t("Weiter", "Continue")} →
+                </button>
+              </div>
+            </section>
+          )}
+          {step === 2 && (
+            <DateTimeSelection
+              serviceId={serviceId}
+              barberId={barberId}
+              barbers={barbers}
+              initialDate={date}
+              initialTime={time}
+              onBack={() => setStep(1)}
+              onContinue={(d, startsAt, resolvedBarber) => {
+                setDate(d);
+                setTime(startsAt);
+                setAssignedBarber(resolvedBarber);
+                setStep(3);
+              }}
+            />
+          )}
+          {step === 3 && service && (
+            <CustomerDetails
+              serviceId={serviceId}
+              barberId={barber?.id ?? ""}
+              startsAt={time}
+              serviceName={serviceCopy(service, language).name}
+              barberName={barber?.name ?? ""}
+              priceCents={service.priceCents}
+              durationMinutes={service.durationMinutes}
+              customer={customer}
+              onCustomerChange={setCustomer}
+              onBack={() => setStep(2)}
+            />
+          )}
+        </>
       )}
     </div>
   );

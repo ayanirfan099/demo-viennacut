@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".qa/**", // Local browser scripts, screenshots and tool caches.
     "out/**",
     "build/**",
     "next-env.d.ts",
