@@ -1,5 +1,7 @@
 
 import "dotenv/config";
+import { business } from "../src/lib/business";
+import { demoServices, demoBarbers } from "../src/lib/catalog";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -16,32 +18,9 @@ async function main() {
   console.log("Seeding Vienna Cuts database...");
 
   // 1. Create demonstration services
-  const services = [
-    {
-      id: "classic-haircut",
-      name: "Classic Haircut",
-      description: "A precise cut tailored to your style.",
-      priceCents: 2800,
-      durationMinutes: 30,
-      sortOrder: 1,
-    },
-    {
-      id: "beard-trim",
-      name: "Beard Trim",
-      description: "Clean lines and expert beard shaping.",
-      priceCents: 1800,
-      durationMinutes: 20,
-      sortOrder: 2,
-    },
-    {
-      id: "haircut-beard",
-      name: "Haircut & Beard",
-      description: "The complete grooming experience.",
-      priceCents: 4000,
-      durationMinutes: 50,
-      sortOrder: 3,
-    },
-  ];
+  const services = demoServices.map(({ id, name, description, priceCents, durationMinutes, sortOrder }) => ({
+    id, name, description, priceCents, durationMinutes, sortOrder,
+  }));
 
   for (const service of services) {
     await prisma.service.upsert({
@@ -51,21 +30,10 @@ async function main() {
     });
   }
 
-  console.log("3 services ready.");
+  console.log(`${services.length} services ready.`);
 
   // 2. Create fictional barbers
-  const barbers = [
-    {
-      id: "barber-alex",
-      name: "Alex",
-      bio: "Classic cuts and modern grooming.",
-    },
-    {
-      id: "barber-daniel",
-      name: "Daniel",
-      bio: "Precision fades and beard styling.",
-    },
-  ];
+  const barbers = demoBarbers.map(({ id, name, bio }) => ({ id, name, bio }));
 
   for (const barber of barbers) {
     await prisma.barber.upsert({
@@ -79,11 +47,7 @@ async function main() {
 
   // 3. Create weekly working hours
   for (const barber of barbers) {
-    for (let day = 1; day <= 6; day++) {
-      // Monday-Friday: 09:00-18:00
-      // Saturday: 10:00-16:00
-      const startMinute = day === 6 ? 600 : 540;
-      const endMinute = day === 6 ? 960 : 1080;
+    for (const { day, startMinute, endMinute } of business.openingHours) {
 
       const id = `hours-${barber.id}-${day}`;
 

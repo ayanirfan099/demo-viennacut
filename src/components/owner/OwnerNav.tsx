@@ -50,7 +50,7 @@ export default function OwnerNav() {
   return (
     <nav
       aria-label="Owner navigation"
-      className="border-b border-border bg-white"
+      className="owner-nav border-b border-border bg-white"
     >
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
         <div className="flex flex-wrap gap-2">

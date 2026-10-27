@@ -60,3 +60,6 @@ next-env.d.ts
 
 # Local source-review archive; do not publish with the repository.
 /vienna-cuts-m4-codex-audit.zip
+
+# Local browser QA artifacts
+/.qa/

@@ -1,12 +1,13 @@
 
 import { DateTime } from "luxon";
+import { business } from "../business";
 import {
   hasBookingConflict,
   type TimeInterval,
 } from "./overlap";
 
-export const BUSINESS_TIME_ZONE = "Europe/Vienna";
-export const SLOT_INCREMENT_MINUTES = 10;
+export const BUSINESS_TIME_ZONE = business.timeZone;
+export const SLOT_INCREMENT_MINUTES = business.slotIncrementMinutes;
 
 const MINUTE_MS = 60_000;
 

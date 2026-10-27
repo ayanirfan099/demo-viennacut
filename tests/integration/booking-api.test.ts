@@ -20,6 +20,39 @@ if (
 }
 
 describe("POST /api/bookings integration", () => {
+  it("atomically rejects concurrent API confirmations without orphan customers", async () => {
+    const names = [`Concurrent A ${randomUUID()}`, `Concurrent B ${randomUUID()}`];
+    const makeRequest = (name: string) => new Request("http://localhost:3000/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceId: "classic-haircut", barberId: "barber-alex",
+        startsAt: "2026-11-18T09:00:00.000Z", customer: { name, email: "concurrency@example.com" } }),
+    });
+    try {
+      const results = await Promise.all(names.map(name => POST(makeRequest(name))));
+      expect(results.map(result => result.status).sort()).toEqual([201, 409]);
+      const customers = await prisma.customer.findMany({ where: { name: { in: names } }, include: { appointments: true } });
+      expect(customers).toHaveLength(1);
+      expect(customers[0].appointments).toHaveLength(1);
+    } finally {
+      const customers = await prisma.customer.findMany({ where: { name: { in: names } }, select: { id: true } });
+      const ids = customers.map(customer => customer.id);
+      await prisma.appointment.deleteMany({ where: { customerId: { in: ids } } });
+      await prisma.customer.deleteMany({ where: { id: { in: ids } } });
+    }
+  });
+
+  it("rejects a booking on a day off without storing customer details", async () => {
+    const name = `Day off ${randomUUID()}`;
+    const response = await POST(new Request("http://localhost:3000/api/bookings", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceId: "classic-haircut", barberId: "barber-alex",
+        startsAt: "2026-11-22T09:00:00.000Z", customer: { name } }),
+    }));
+    expect(response.status).toBe(409);
+    expect(await prisma.customer.count({ where: { name } })).toBe(0);
+  });
+
   it("connects to the test database", async () => {
     const serviceCount = await prisma.service.count();
 

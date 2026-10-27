@@ -1,13 +1,20 @@
-
 import type { Metadata } from "next";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import SiteHeader from "@/components/site/SiteHeader";
+import { LanguageProvider } from "@/components/site/LanguageProvider";
+import SiteFooter from "@/components/site/SiteFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Vienna Cuts | Premium Barbershop",
+  title: "Vienna Cuts — Handwerk. Haltung. Dein Stil.",
+  openGraph: {
+    title: "Vienna Cuts — Barber Culture",
+    description: "Ein fiktives Wiener Studio. Entdecke unsere Demo.",
+    locale: "de_AT",
+    type: "website",
+  },
+  twitter: { card: "summary", title: "Vienna Cuts — Barber Culture" },
   description:
-    "Modern barbering, classic style, and expert grooming in Vienna, Austria.",
+    "Fiktives Wiener Barberstudio. Präzise Schnitte, Bartpflege und entspannte Rituale. Vienna Cuts Demo.",
 };
 
 export default function RootLayout({
@@ -16,11 +23,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body className="antialiased">
-        <Navbar />
-        {children}
-        <Footer />
+        <LanguageProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </LanguageProvider>
       </body>
     </html>
   );

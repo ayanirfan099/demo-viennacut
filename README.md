@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vienna Cuts
 
-## Getting Started
+A fictional Vienna barbershop demo built in the existing `demo-viennacut` application. German is the primary customer language; the language switcher supports English. Sample identities, illustrations, testimonials and business information are demonstration content, not verified claims about a real shop.
 
-First, run the development server:
+## Architecture
+
+- Next.js 16 App Router, React 19, TypeScript and Tailwind CSS 4.
+- PostgreSQL through Prisma 7 and `@prisma/adapter-pg`. There is no Supabase integration or second booking database.
+- Public service, barber, availability and booking endpoints under `src/app/api`.
+- Better Auth with Prisma-backed owner sessions and server-side owner authorization. Existing appointment list, calendar, dashboard and management routes are retained.
+- Booking availability uses `Europe/Vienna`, staff working hours and blocked periods. PostgreSQL exclusion constraints prevent overlapping active appointments atomically. Booking prices and durations are snapshotted from database service records.
+- `prisma7.config.ts` is the Prisma configuration; use the package scripts below rather than bare Prisma commands.
+
+## Local setup
+
+Use Node.js 22, npm and PostgreSQL 16 with the `btree_gist` extension available. Use the existing checkout; no additional repository or worktree is necessary.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edit `.env` locally. Never commit it or paste its values into logs or chat.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection to the development database `vienna_cuts` |
+| `BETTER_AUTH_URL` | Exact application origin; local HTTP is supported, non-local origins require HTTPS |
+| `BETTER_AUTH_SECRET` | Cryptographically random secret of at least 32 characters |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create databases `vienna_cuts` and `vienna_cuts_test` with an appropriately scoped local database role, then run:
 
-## Learn More
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Create an ignored `.env.test` containing only the local test connection:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```dotenv
+DATABASE_URL="postgresql://YOUR_LOCAL_USER:YOUR_LOCAL_PASSWORD@localhost:5432/vienna_cuts_test?schema=public"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Prepare the separate test database using its connection in the current shell:
 
-## Deploy on Vercel
+```bash
+DATABASE_URL='postgresql://YOUR_LOCAL_USER:YOUR_LOCAL_PASSWORD@localhost:5432/vienna_cuts_test?schema=public' npm run prisma:migrate
+DATABASE_URL='postgresql://YOUR_LOCAL_USER:YOUR_LOCAL_PASSWORD@localhost:5432/vienna_cuts_test?schema=public' npm run prisma:seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tests refuse non-local targets and database names other than `vienna_cuts_test`. Tests create and remove fixtures: never point them at production or valuable development data. The seed contains fictional services, barbers and working hours. Seeding does not create a publicly shared owner password.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prepared cloud environment
+
+The current cloud workspace has Node.js 22 under `/workspace/.cloud-tools/node_modules/node/bin` and a local PostgreSQL cluster under `/workspace/.cloud-setup/pgdata`. Activate and restart retained tools with:
+
+```bash
+export PATH=/workspace/.cloud-tools/node_modules/node/bin:$PATH
+export npm_config_cache=/workspace/.npm
+bash /workspace/.cloud-setup/start-postgres.sh
+```
+
+Cloud PostgreSQL listens only on loopback and uses trust authentication for disposable local data. Do not reuse that configuration for deployment. Processes do not survive environment snapshots and must be restarted. Engine installation requires verified HTTPS access to `binaries.prisma.sh`; do not bypass TLS or checksum verification if that download is blocked.
+
+## Owner access
+
+Provision a local owner interactively:
+
+```bash
+npm run owner:provision -- --database vienna_cuts
+```
+
+The script checks the local database name, requests confirmation, then asks for an email, name and hidden password. It preserves existing credentials and refuses to silently promote an unrelated account. There are no default credentials. Open `/owner/login` to sign in. Owner APIs enforce authentication and role checks independently of the UI; production provisioning must use a separately reviewed operational procedure because the helper intentionally accepts only local databases.
+
+## Development and verification
+
+```bash
+npm run lint
+npm run typecheck
+npm run test:unit
+npm run test:integration
+npm test
+npm run build
+npm start
+```
+
+The Vitest suites include availability, overlapping intervals, concurrent booking constraints, invalid inputs, working hours and time zones, owner access and appointment management. The full database suites require generated Prisma client, applied migrations and seeded test data. A passing booking unit suite alone does not verify database persistence or authorization.
+
+For a functional smoke test, start the app and request `/api/services`, `/api/barbers` and `/api/availability?serviceId=classic-haircut&barberId=barber-alex&date=2026-11-16`. Use a future scheduled date when this example becomes stale. Verify a real booking only against disposable local data. Failed or unavailable backend responses must never be presented as successful appointments.
+
+Browser QA should cover 375px mobile, tablet and 1440px desktop; keyboard navigation; language persistence; service/barber preselection; gallery controls; form validation; actual booking submission; duplicate slot rejection; and unauthenticated owner access. Screenshots and checks are evidence only for the exact version and runtime tested.
+
+## Content, images and legal review
+
+Customer presentation lives in reusable site components. `src/lib/business.ts` centralizes fictional business settings, opening hours and slot increments used by the seed and availability engine. `src/lib/catalog.ts` supplies the shared fictional service and barber catalogue used by public pages and the seed. The seed includes five treatments: haircut, beard, haircut and beard, skin fade and premium grooming. Database records remain authoritative for live availability, prices and booking durations; seed the local database after catalogue changes and keep advertised data aligned with deployed records.
+
+The repository initially contained only framework starter SVGs, with no licensed barbershop photography. New original illustrative artwork is explicitly labeled as illustrative. Replace illustrations with licensed images only when you can document rights, creator attribution where required, alt text and dimensions. Do not invent before/after pairs or use reference-site assets. Team profiles and testimonials must remain visibly fictional until replaced by verified content.
+
+Reference inspection of `https://onyx-cuts.at/` was attempted during development, but the environment proxy returned HTTP CONNECT 403. No reference source code, photography, logos or written copy was acquired. The visual direction therefore follows the provided brief rather than a verified live-site comparison.
+
+`/impressum`, `/datenschutz` and `/cookies` contain explicitly marked owner-review drafts. Before public operation, supply the legal entity, verified address/contact, required registration information, privacy controller, processors, legal bases and concrete retention policy. Automatic customer-data deletion is not implemented. Do not collect real customer data until these operational responsibilities are resolved. No marketing analytics or embedded maps are added by default. Owner authentication uses necessary cookies; language preference uses browser storage.
+
+The fictional demo is excluded from indexing by `robots.ts`; `sitemap.ts` deliberately returns no fictitious canonical URLs. Replace these only when a verified production domain and legal identity exist. Do not publish fabricated LocalBusiness addresses or ratings.
+
+## Deployment
+
+1. Use a production PostgreSQL database and a least-privilege application role; allow migrations to create the required extension using a reviewed migration role if needed.
+2. Configure HTTPS, the exact `BETTER_AUTH_URL`, a unique `BETTER_AUTH_SECRET`, and `DATABASE_URL` through secure deployment settings.
+3. Run `npm ci`, `npm run prisma:generate`, `npm run prisma:migrate`, and `npm run build`; serve with `npm start`. Seed only an explicitly designated demo database.
+4. Confirm owner-only access, secure cookies, origin enforcement, booking conflicts and failure handling on the deployed origin.
+5. Set documented backup, deletion, restore and monitoring procedures. Review distributed request throttling/bot protection before opening booking to public traffic; do not treat a frontend submit lock as abuse protection.
+6. Replace demo claims, asset placeholders and legal drafts, then configure canonical SEO and indexing intentionally.
+
+No production deployment, live database change or credential publication is part of this repository update.
+
+## Verification record and boundaries
+
+On 2026-10-27 the prepared local environment passed ESLint, TypeScript, a production build and 234 Vitest tests across 20 files. Production-server Chromium checks covered all eight customer/legal pages at 375, 768 and 1440 pixels: HTTP 200, no horizontal overflow, no browser exceptions, persistent DE/EN selection, category filtering and Escape-to-close gallery controls. A mobile journey verified service/barber preselection, retained details on back navigation, review before submission, a stored appointment, duplicate-slot HTTP 409 and anonymous owner API HTTP 401. QA fixtures were removed afterward. Local screenshots/scripts are ignored under `.qa/`.
+
+The existing owner dashboard, appointment filters, list/calendar and authorized status changes remain in place; its management content is still English. Public pages and booking UI are bilingual, with German-first static metadata and language-aware browser titles. No verified real shop contact information, photography, before/after pairs, business schema or public canonical domain has been supplied. Staff working hours and blocks are supported by the database; a new staff scheduling editor, configurable cleanup buffer, idempotency keys, public rescheduling and distributed booking spam throttling are not included. The transactional database constraint and frontend submit lock prevent duplicate slot submissions, but are not a substitute for those operational enhancements. Nothing was deployed or pushed.

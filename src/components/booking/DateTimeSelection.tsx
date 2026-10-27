@@ -1,81 +1,81 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import type {
+  ApiBarber,
   AvailabilitySlot,
   AvailabilityResponse,
 } from "@/lib/booking/api-types";
-
-type DateTimeSelectionProps = {
+import { useLanguage } from "@/components/site/LanguageProvider";
+type Slot = AvailabilitySlot & { barberId: string };
+type Props = {
   serviceId: string;
   barberId: string;
+  barbers: ApiBarber[];
+  initialDate: string;
+  initialTime: string;
   onBack: () => void;
-  onContinue: (date: string, startsAt: string) => void;
+  onContinue: (date: string, startsAt: string, barberId: string) => void;
 };
-
 export default function DateTimeSelection({
   serviceId,
   barberId,
+  barbers,
+  initialDate,
+  initialTime,
   onBack,
   onContinue,
-}: DateTimeSelectionProps) {
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-  const [availableSlots, setAvailableSlots] = useState<AvailabilitySlot[]>([]);
-  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
-  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-
+}: Props) {
+  const { t } = useLanguage();
+  const [date, setDate] = useState(initialDate);
+  const [time, setTime] = useState(initialTime);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [loading, setLoading] = useState(Boolean(initialDate));
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!selectedDate || !serviceId || !barberId) {
-      return;
-    }
-
+    if (!date) return;
     const controller = new AbortController();
-
-    async function loadAvailability() {
-      setIsLoadingAvailability(true);
-
+    async function load() {
+      setLoading(true);
+      setError(false);
       try {
-        const params = new URLSearchParams({
-          serviceId,
-          barberId,
-          date: selectedDate,
-        });
-
-        const response = await fetch(
-          `/api/availability?${params.toString()}`,
-          { signal: controller.signal }
+        const ids = barberId === "any" ? barbers.map((b) => b.id) : [barberId];
+        const results = await Promise.all(
+          ids.map(async (id) => {
+            const params = new URLSearchParams({
+              serviceId,
+              barberId: id,
+              date,
+            });
+            const response = await fetch(`/api/availability?${params}`, {
+              signal: controller.signal,
+            });
+            if (!response.ok) throw Error("Availability unavailable");
+            const data: AvailabilityResponse = await response.json();
+            return data.slots.map((slot) => ({ ...slot, barberId: id }));
+          }),
         );
-
-        if (!response.ok) {
-          throw new Error("Unable to load available appointment times.");
-        }
-
-        const data: AvailabilityResponse = await response.json();
-
         if (controller.signal.aborted) return;
-
-        setAvailableSlots(data.slots);
-      } catch (error) {
-        if (controller.signal.aborted) return;
-
-        setAvailabilityError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load available appointment times."
+        const unique = new Map<string, Slot>();
+        for (const slot of results.flat())
+          if (!unique.has(slot.startsAt)) unique.set(slot.startsAt, slot);
+        setSlots(
+          [...unique.values()].sort((a, b) =>
+            a.startsAt.localeCompare(b.startsAt),
+          ),
         );
-      } finally {
+      } catch {
         if (!controller.signal.aborted) {
-          setIsLoadingAvailability(false);
+          setError(true);
+          setSlots([]);
         }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
-
-    void loadAvailability();
-
+    void load();
     return () => controller.abort();
-  }, [selectedDate, serviceId, barberId]);
-
+  }, [date, serviceId, barberId, barbers, retry]);
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Vienna",
     year: "numeric",
@@ -83,125 +83,117 @@ export default function DateTimeSelection({
     day: "2-digit",
   })
     .formatToParts(new Date())
-    .reduce<Record<string, string>>((parts, part) => {
-      if (part.type !== "literal") parts[part.type] = part.value;
-      return parts;
+    .reduce<Record<string, string>>((acc, p) => {
+      acc[p.type] = p.value;
+      return acc;
     }, {});
-
   const minDate = `${today.year}-${today.month}-${today.day}`;
-
+  const selected = slots.find((s) => s.startsAt === time);
   return (
-    <section aria-labelledby="datetime-heading" className="mt-12">
+    <section className="mt-10" aria-labelledby="datetime-heading">
       <h2 id="datetime-heading" className="text-2xl font-semibold">
-        Select date & time
+        {t("Zeit für dich.", "Time for yourself.")}
       </h2>
-
       <p className="mt-2 text-muted">
-        Choose your preferred appointment date and time.
+        {t(
+          "Alle Zeiten: Europe/Vienna. Freie Termine werden live geprüft.",
+          "All times: Europe/Vienna. Available appointments are checked live.",
+        )}
       </p>
-
-      <div className="mt-8">
-        <label
-          htmlFor="appointment-date"
-          className="block text-sm font-medium"
-        >
-          Appointment date
-        </label>
-
-        <input
-          id="appointment-date"
-          type="date"
-          min={minDate}
-          value={selectedDate}
-          onChange={(event) => {
-            setSelectedDate(event.target.value);
-            setSelectedTime("");
-            setAvailableSlots([]);
-            setAvailabilityError(null);
-            setIsLoadingAvailability(Boolean(event.target.value));
-          }}
-          className="mt-3 w-full rounded-md border border-border bg-surface px-4 py-3 sm:max-w-xs"
-        />
-      </div>
-
-      {selectedDate && (
+      <label
+        htmlFor="appointment-date"
+        className="mt-8 block text-sm font-medium"
+      >
+        {t("Datum wählen", "Choose a date")}
+      </label>
+      <input
+        id="appointment-date"
+        type="date"
+        min={minDate}
+        value={date}
+        onChange={(e) => {
+          setDate(e.target.value);
+          setTime("");
+          setSlots([]);
+          setError(false);
+          setLoading(Boolean(e.target.value));
+        }}
+        className="mt-3 w-full rounded-md border border-border bg-surface p-4 sm:max-w-xs"
+      />
+      {date && (
         <div className="mt-8">
           <h3 className="text-lg font-semibold">
-            Available times
+            {t("Verfügbare Zeiten", "Available times")}
           </h3>
-
-          <p className="mt-2 text-sm text-muted">
-            All appointment times are shown in Vienna local time
-            (Europe/Vienna).
-          </p>
-
-          {isLoadingAvailability && (
-            <p role="status" className="mt-5 text-sm text-muted">
-              Checking available appointment times...
+          {loading && (
+            <p role="status" className="mt-5 text-muted">
+              {t(
+                "Freie Termine werden gesucht …",
+                "Checking available appointments …",
+              )}
             </p>
           )}
-
-          {availabilityError && (
-            <p
-              role="alert"
-              className="mt-5 rounded-md border border-red-500 p-4 text-sm text-red-600"
-            >
-              {availabilityError}
-            </p>
-          )}
-
-          {!isLoadingAvailability &&
-            !availabilityError &&
-            availableSlots.length === 0 && (
-              <p role="status" className="mt-5 text-sm text-muted">
-                No appointments are available on this date.
-                Please choose another date.
+          {error && (
+            <div role="alert" className="mt-5 border border-accent p-4">
+              <p>
+                {t(
+                  "Termine konnten nicht geladen werden.",
+                  "Appointment times could not be loaded.",
+                )}
               </p>
-            )}
-
-          <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {availableSlots.map((slot) => (
               <button
-                key={slot.startsAt}
-                type="button"
-                aria-pressed={selectedTime === slot.startsAt}
-                onClick={() => setSelectedTime(slot.startsAt)}
-                className={`cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
-                  selectedTime === slot.startsAt
-                    ? "border-accent bg-accent/10 font-semibold"
-                    : "border-border bg-surface hover:border-accent"
-                }`}
+                className="mt-2 underline"
+                onClick={() => setRetry((n) => n + 1)}
               >
-                {slot.localTime}
+                {t("Erneut versuchen", "Try again")}
               </button>
-            ))}
-          </div>
+            </div>
+          )}
+          {!loading && !error && !slots.length && (
+            <p role="status" className="mt-5 text-muted">
+              {t(
+                "An diesem Tag sind keine Termine frei. Bitte wähle ein anderes Datum.",
+                "No appointments are available on this date. Please choose another date.",
+              )}
+            </p>
+          )}
+          {!loading && !error && (
+            <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {slots.map((slot) => (
+                <button
+                  key={slot.startsAt}
+                  aria-pressed={time === slot.startsAt}
+                  onClick={() => setTime(slot.startsAt)}
+                  className={`rounded-md border px-3 py-4 text-sm ${time === slot.startsAt ? "border-accent bg-accent/10 font-semibold" : "border-border bg-surface hover:border-accent"}`}
+                >
+                  {slot.localTime}
+                </button>
+              ))}
+            </div>
+          )}
+          {barberId === "any" && selected && (
+            <p className="mt-4 text-sm text-muted">
+              {t("Dein Barber", "Your barber")}:{" "}
+              {barbers.find((b) => b.id === selected.barberId)?.name}
+            </p>
+          )}
         </div>
       )}
-
-      <div className="mt-10 flex items-center justify-between gap-4">
+      <div className="mt-10 flex justify-between gap-3">
         <button
-          type="button"
           onClick={onBack}
-          className="cursor-pointer rounded-md border border-border px-6 py-3 font-medium hover:border-accent"
+          className="rounded-md border border-border px-6 py-3"
         >
-          Back
+          {t("Zurück", "Back")}
         </button>
-
         <button
-          type="button"
-          disabled={
-            !selectedDate ||
-            !selectedTime ||
-            selectedDate < minDate ||
-            isLoadingAvailability ||
-            Boolean(availabilityError) ||
-            !availableSlots.some((slot) => slot.startsAt === selectedTime)
-          }
-          onClick={() => onContinue(selectedDate, selectedTime)}
-          className="cursor-pointer rounded-md bg-foreground px-7 py-3 font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!selected || !date || date < minDate || loading || error}
+          onClick={() => {
+            if (selected) onContinue(date, time, selected.barberId);
+          }}
+          className="rounded-md bg-foreground px-7 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Continue
+          {t("Weiter", "Continue")} →
         </button>
       </div>
     </section>

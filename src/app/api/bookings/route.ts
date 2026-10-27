@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       startsAt.getTime() + service.durationMinutes * 60_000
     );
 
-    // Temporary safeguard until appointment creation is enabled.
+    // Reject invalid configured durations before storing an appointment.
     if (endsAt <= startsAt) {
       return NextResponse.json(
         { error: "Invalid service duration." },
@@ -234,7 +234,8 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error("Failed to process booking request:", error);
+    // Prisma errors can include query arguments containing customer details.
+    console.error("Failed to process booking request.");
 
     return NextResponse.json(
       { error: "Unable to process booking request." },

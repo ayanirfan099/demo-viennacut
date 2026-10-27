@@ -1,23 +1,25 @@
+"use client";
 import Container from "@/components/ui/Container";
 import BookingFlow from "@/components/booking/BookingFlow";
-
+import { useLanguage } from "@/components/site/LanguageProvider";
 export default function BookingPage() {
+  const { t } = useLanguage();
   return (
-    <main className="py-16 md:py-24">
+    <main id="main" className="py-24 md:py-32">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-accent">
-            Vienna Cuts
+          <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-accent">
+            Vienna Cuts · {t("Online-Buchung", "Online booking")}
           </p>
-
-          <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            Book your appointment
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
+            {t("Dein nächster guter Schnitt.", "Your next great cut.")}
           </h1>
-
-          <p className="mt-4 text-muted">
-            Choose your service to get started.
+          <p className="mt-5 max-w-xl text-muted">
+            {t(
+              "Wähle deinen Look. Wir kümmern uns um die Details. Dies ist ein Demostudio; gespeicherte Termine sind Testbuchungen.",
+              "Choose your look. We will take care of the details. This is a demo studio; saved appointments are test bookings.",
+            )}
           </p>
-
           <BookingFlow />
         </div>
       </Container>
