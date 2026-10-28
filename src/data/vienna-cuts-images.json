@@ -1,0 +1,358 @@
+{
+  "pack": "Vienna Cuts — fictional AI-generated imagery",
+  "version": "1.0",
+  "images": [
+    {
+      "file": "hero-desktop.webp",
+      "category": "hero",
+      "placement": "Desktop hero full-bleed background",
+      "alt_de": "Fiktiver Kunde beim modernen Herrenhaarschnitt in einem dunklen Barbershop",
+      "alt_en": "Fictional client receiving a modern haircut in a dark barbershop",
+      "width": 1920,
+      "height": 825
+    },
+    {
+      "file": "hero-mobile.webp",
+      "category": "hero",
+      "placement": "hero",
+      "alt_de": "Fiktiver Kunde mit modernem Herrenhaarschnitt",
+      "alt_en": "Fictional client with modern mens haircut",
+      "width": 543,
+      "height": 843
+    },
+    {
+      "file": "studio-interior.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Modernes Barbershop-Interieur mit schwarzen Stuehlen und warmem Licht",
+      "alt_en": "Modern barbershop interior with black chairs and warm lights",
+      "width": 1000,
+      "height": 512
+    },
+    {
+      "file": "studio-interior-alt.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Dunkler Barbershop mit mehreren Schneideplaetzen",
+      "alt_en": "Dark barbershop with multiple styling stations",
+      "width": 1000,
+      "height": 755
+    },
+    {
+      "file": "studio-reception.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Premium Empfangstheke eines fiktiven Barbershops",
+      "alt_en": "Premium reception desk of a fictional barbershop",
+      "width": 852,
+      "height": 858
+    },
+    {
+      "file": "studio-exterior.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Fiktive Vienna Cuts Schaufensterfront",
+      "alt_en": "Fictional Vienna Cuts storefront",
+      "width": 978,
+      "height": 906
+    },
+    {
+      "file": "studio-lounge.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Gemütlicher Wartebereich mit schwarzem Ledersofa",
+      "alt_en": "Comfortable waiting lounge with a black leather sofa",
+      "width": 1000,
+      "height": 574
+    },
+    {
+      "file": "studio-lounge-alt.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Eleganter Barbershop Wartebereich mit Ledersesseln",
+      "alt_en": "Elegant barbershop lounge with leather armchairs",
+      "width": 972,
+      "height": 543
+    },
+    {
+      "file": "studio-gallery.webp",
+      "category": "studio",
+      "placement": "studio",
+      "alt_de": "Atmosphaerischer Blick durch den Barbershop",
+      "alt_en": "Atmospheric view through a barbershop",
+      "width": 930,
+      "height": 693
+    },
+    {
+      "file": "service-haircut.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Herrenhaarschnitt mit professioneller Haarschneidemaschine",
+      "alt_en": "Mens haircut with professional clippers",
+      "width": 615,
+      "height": 612
+    },
+    {
+      "file": "service-beard.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Bartpflege in einem klassischen Barbershop",
+      "alt_en": "Beard care in a classic barbershop",
+      "width": 603,
+      "height": 618
+    },
+    {
+      "file": "service-hair-beard.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Kombinierte Haar- und Bartpflege",
+      "alt_en": "Combined haircut and beard grooming",
+      "width": 600,
+      "height": 618
+    },
+    {
+      "file": "service-skin-fade.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Skin Fade mit präzisem Übergang",
+      "alt_en": "Skin fade with precise blending",
+      "width": 594,
+      "height": 627
+    },
+    {
+      "file": "service-grooming.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Entspannende Premium Grooming Behandlung",
+      "alt_en": "Relaxing premium grooming treatment",
+      "width": 573,
+      "height": 615
+    },
+    {
+      "file": "service-shave.webp",
+      "category": "services",
+      "placement": "services",
+      "alt_de": "Traditionelle Nassrasur mit Rasierschaum",
+      "alt_en": "Classic wet shave with shaving foam",
+      "width": 687,
+      "height": 576
+    },
+    {
+      "file": "team-alex.webp",
+      "category": "team",
+      "placement": "team",
+      "alt_de": "KI-generiertes Portraet des fiktiven Barbers Alex",
+      "alt_en": "AI generated portrait of fictional barber Alex",
+      "width": 483,
+      "height": 528
+    },
+    {
+      "file": "team-lukas.webp",
+      "category": "team",
+      "placement": "team",
+      "alt_de": "KI-generiertes Portraet des fiktiven Barbers Lukas",
+      "alt_en": "AI generated portrait of fictional barber Lukas",
+      "width": 486,
+      "height": 528
+    },
+    {
+      "file": "team-emre.webp",
+      "category": "team",
+      "placement": "team",
+      "alt_de": "KI-generiertes Portraet des fiktiven Barbers Emre",
+      "alt_en": "AI generated portrait of fictional barber Emre",
+      "width": 483,
+      "height": 531
+    },
+    {
+      "file": "team-david.webp",
+      "category": "team",
+      "placement": "team",
+      "alt_de": "KI-generiertes Portraet des fiktiven Barbers David",
+      "alt_en": "AI generated portrait of fictional barber David",
+      "width": 471,
+      "height": 531
+    },
+    {
+      "file": "gallery-cut-detail.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Seitenansicht eines modernen Kurzhaarschnitts",
+      "alt_en": "Side view of a modern short haircut",
+      "width": 498,
+      "height": 525
+    },
+    {
+      "file": "gallery-beard-detail.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Detailaufnahme professioneller Bartpflege",
+      "alt_en": "Close view of professional beard care",
+      "width": 489,
+      "height": 528
+    },
+    {
+      "file": "gallery-fade-detail.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Feiner Fade-Haarschnitt von hinten",
+      "alt_en": "Detailed fade haircut from the back",
+      "width": 504,
+      "height": 528
+    },
+    {
+      "file": "gallery-grooming-detail.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Haar- und Gesichtsbehandlung",
+      "alt_en": "Hair and face grooming treatment",
+      "width": 552,
+      "height": 528
+    },
+    {
+      "file": "gallery-clipper-work.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Barber schneidet präzise einen Nacken-Fade",
+      "alt_en": "Barber precisely cutting a neckline fade",
+      "width": 780,
+      "height": 690
+    },
+    {
+      "file": "gallery-scissors.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Professionelle Schere und Kamm auf dunklem Stoff",
+      "alt_en": "Professional scissors and comb on dark fabric",
+      "width": 600,
+      "height": 582
+    },
+    {
+      "file": "gallery-products.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Premium-Pflegeprodukte und Rasierpinsel",
+      "alt_en": "Premium hair care products and shaving brush",
+      "width": 654,
+      "height": 576
+    },
+    {
+      "file": "gallery-salon-products.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Pflegeprodukte in einem eleganten Barbershop-Regal",
+      "alt_en": "Grooming products on an elegant barbershop shelf",
+      "width": 912,
+      "height": 690
+    },
+    {
+      "file": "gallery-coffee.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Espresso im Vienna Cuts Wartebereich",
+      "alt_en": "Espresso in Vienna Cuts waiting area",
+      "width": 828,
+      "height": 531
+    },
+    {
+      "file": "gallery-tools.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Barberwerkzeuge aus Metall auf dunkler Ablage",
+      "alt_en": "Steel barber tools on dark surface",
+      "width": 627,
+      "height": 549
+    },
+    {
+      "file": "gallery-facade.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Fiktive Vienna Cuts Barbershop Fassade",
+      "alt_en": "Fictional Vienna Cuts barbershop facade",
+      "width": 921,
+      "height": 516
+    },
+    {
+      "file": "gallery-vienna.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Illustrative Wien-Ansicht mit historischen Gebaeuden",
+      "alt_en": "Illustrative view of Vienna and historic buildings",
+      "width": 513,
+      "height": 522
+    },
+    {
+      "file": "gallery-vienna-architecture.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Historische Wiener Architektur",
+      "alt_en": "Historic architecture in Vienna",
+      "width": 513,
+      "height": 504
+    },
+    {
+      "file": "gallery-neon.webp",
+      "category": "gallery",
+      "placement": "gallery",
+      "alt_de": "Leuchtende Good Hair Good Mood Wandbeschriftung",
+      "alt_en": "Glowing Good Hair Good Mood wall lettering",
+      "width": 678,
+      "height": 687
+    },
+    {
+      "file": "concept-fade-before.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Frisuransicht vor dem Styling",
+      "alt_en": "AI concept image of hairstyle before styling",
+      "width": 426,
+      "height": 447
+    },
+    {
+      "file": "concept-fade-after.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Frisuransicht nach dem Styling",
+      "alt_en": "AI concept image of hairstyle after styling",
+      "width": 435,
+      "height": 447
+    },
+    {
+      "file": "concept-side-before.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Seitenansicht vor dem Styling",
+      "alt_en": "AI concept image side view before styling",
+      "width": 423,
+      "height": 447
+    },
+    {
+      "file": "concept-side-after.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Seitenansicht nach dem Styling",
+      "alt_en": "AI concept image side view after styling",
+      "width": 312,
+      "height": 447
+    },
+    {
+      "file": "concept-beard-before.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Bart vor dem Styling",
+      "alt_en": "AI concept image beard before styling",
+      "width": 495,
+      "height": 447
+    },
+    {
+      "file": "concept-beard-after.webp",
+      "category": "concept",
+      "placement": "concept",
+      "alt_de": "KI-Beispiel Bart nach dem Styling",
+      "alt_en": "AI concept image beard after styling",
+      "width": 411,
+      "height": 447
+    }
+  ],
+  "notice": "All people, barbershop locations, brand imagery, reviews, and transformations depicted here are fictional AI-generated concepts, not documentation of a real business or actual clients. Do not describe them as genuine shop photos, verified customer results, or real team members."
+}
