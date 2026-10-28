@@ -1,10 +1,13 @@
 "use client";
 import { business, openingRange } from "@/lib/business";
-import Image from "next/image";
+import { AssetImage, HeroMedia, ImageCreditNotice } from "./AssetMedia";
+import { Gallery, Team, StudioExperience } from "./AssetSections";
+export { Gallery, Team } from "./AssetSections";
+import { serviceImages } from "@/lib/images";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "./LanguageProvider";
-import { demoServices, demoBarbers } from "@/lib/catalog";
+import { demoServices } from "@/lib/catalog";
 export function SectionTitle({
   label,
   de,
@@ -57,6 +60,10 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
               href={`/book?service=${s.id}`}
               key={s.id}
             >
+              <AssetImage
+                name={serviceImages[s.id]}
+                className="service-photo"
+              />
               <span className="service-index">0{i + 1}</span>
               <div>
                 <h3>{t(s.deName, s.name)}</h3>
@@ -89,6 +96,27 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
               </div>
             </Link>
           ))}
+        {!preview && (category === "all" || category === "beard") && (
+          <article className="service-row shave-concept">
+            <AssetImage name="service-shave" className="service-photo" />
+            <div>
+              <p className="eyebrow">
+                {t("Behandlungskonzept", "Treatment concept")}
+              </p>
+              <h3>{t("Die klassische Rasur", "The classic shave")}</h3>
+              <p>
+                {t(
+                  "Eine Idee für unser künftiges Angebot. Aktuell nicht separat buchbar.",
+                  "An idea for our future menu. Not currently a separate bookable treatment.",
+                )}
+              </p>
+              <Link className="text-link" href="/book?service=beard-trim">
+                {t("Verfügbare Bartpflege buchen", "Book available beard care")}{" "}
+                →
+              </Link>
+            </div>
+          </article>
+        )}
       </div>
       <p className="fine-print">
         {t(
@@ -96,147 +124,6 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
           "Demo prices from our central catalog. Booking uses the current database catalog.",
         )}
       </p>
-    </>
-  );
-}
-export function Gallery({ compact = false }: { compact?: boolean }) {
-  const { t } = useLanguage();
-  const [selected, setSelected] = useState(0);
-  const modal = useRef<HTMLDialogElement>(null);
-  return (
-    <>
-      <p className="section-intro">
-        {t(
-          "Eine visuelle Vorstellung unseres Studios. Originale Illustrationen — keine Kundenfotos oder Vorher-nachher-Ergebnisse.",
-          "An impression of our imagined studio. Original illustrations — not client photographs or before-and-after results.",
-        )}
-      </p>
-      <div className={`gallery-grid ${compact ? "compact" : ""}`}>
-        {[1, 2, 3].map((n) => (
-          <button
-            key={n}
-            className="gallery-item"
-            onClick={() => {
-              setSelected(n);
-              modal.current?.showModal();
-            }}
-            aria-label={t(
-              `Studio-Illustration ${n} vergrößern`,
-              `Enlarge studio illustration ${n}`,
-            )}
-          >
-            <Image
-              src={`/art/studio-${n}.svg`}
-              alt={t(
-                "Illustriertes Studio mit Spiegel, warmem Licht und Barberstuhl",
-                "Illustrated studio with mirror, warm lighting and barber chair",
-              )}
-              width={1000}
-              height={1200}
-              sizes="(max-width:700px) 90vw, 33vw"
-            />
-            <span>
-              0{n} /{" "}
-              {t(
-                ["Das Studio", "Die Details", "Das Ritual"][n - 1],
-                ["The studio", "The details", "The ritual"][n - 1],
-              )}{" "}
-              <b>
-                <svg
-                  aria-hidden="true"
-                  className="arrow-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M5 19 19 5M5 5h14v14" />
-                </svg>
-              </b>
-            </span>
-          </button>
-        ))}
-      </div>
-      <dialog
-        ref={modal}
-        className="lightbox"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) modal.current?.close();
-        }}
-      >
-        <button
-          autoFocus
-          className="close-modal"
-          onClick={() => modal.current?.close()}
-          aria-label={t("Schließen", "Close")}
-        >
-          ×
-        </button>
-        {selected > 0 && (
-          <Image
-            src={`/art/studio-${selected}.svg`}
-            alt={t(
-              "Vergrößerte Studio-Illustration",
-              "Enlarged studio illustration",
-            )}
-            width={1000}
-            height={1200}
-          />
-        )}
-        <p>
-          {t(
-            "Originale Studio-Illustration · Demo",
-            "Original studio illustration · Demo",
-          )}
-        </p>
-      </dialog>
-    </>
-  );
-}
-export function Team() {
-  const { t } = useLanguage();
-  return (
-    <>
-      <p className="section-intro">
-        {t(
-          "Fiktive Profile für diese Demo. Gemeinsam steht unser Team für ein entspanntes, aufmerksames Studioerlebnis.",
-          "Fictional profiles for this demo. Our imagined team shares a calm, attentive approach to grooming.",
-        )}
-      </p>
-      <div className="team-grid">
-        {demoBarbers.map((b, i) => (
-          <article className="barber-card" key={b.id}>
-            <div className={`barber-monogram portrait-${i}`} aria-hidden="true">
-              <span>{b.name.slice(0, 1)}</span>
-              <small>VIENNA CUTS / {t("DEMOPROFIL", "DEMO PROFILE")}</small>
-            </div>
-            <div className="barber-detail">
-              <p className="eyebrow">
-                {t("Barber · Demoprofil", "Barber · Demo profile")}
-              </p>
-              <h3>{b.name}</h3>
-              <p>{t(b.deBio, b.bio)}</p>
-              <Link className="text-link" href={`/book?barber=${b.id}`}>
-                {t(`Termin bei ${b.name}`, `Book with ${b.name}`)}{" "}
-                <svg
-                  aria-hidden="true"
-                  className="arrow-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M5 19 19 5M5 5h14v14" />
-                </svg>
-              </Link>
-            </div>
-          </article>
-        ))}
-      </div>
     </>
   );
 }
@@ -282,16 +169,7 @@ export default function StudioHome() {
     <main id="main">
       <section className="hero">
         <div className="hero-art">
-          <Image
-            src="/art/studio-1.svg"
-            alt={t(
-              "Originalillustration eines ruhigen Barberstudios",
-              "Original illustration of a calm barber studio",
-            )}
-            fill
-            preload
-            sizes="(max-width:800px) 100vw, 60vw"
-          />
+          <HeroMedia />
         </div>
         <div className="site-wrap hero-content">
           <p className="eyebrow">
@@ -334,8 +212,8 @@ export default function StudioHome() {
             <span>01 / VIENNA CUTS</span>
             <span>
               {t(
-                "FIKTIVES STUDIO · ORIGINALILLUSTRATION",
-                "FICTIONAL STUDIO · ORIGINAL ILLUSTRATION",
+                "FIKTIVES STUDIO · KI-GENERIERTE BILDER",
+                "FICTIONAL STUDIO · AI-GENERATED IMAGERY",
               )}
             </span>
           </div>
@@ -381,16 +259,12 @@ export default function StudioHome() {
       <section className="about-section" id="about">
         <div className="site-wrap about-grid">
           <div className="about-art">
-            <Image
-              src="/art/studio-3.svg"
-              width={1000}
-              height={1200}
-              alt={t(
-                "Illustration unseres fiktiven Studios",
-                "Illustration of our fictional studio",
-              )}
+            <AssetImage
+              name="studio-interior"
+              sizes="(max-width:700px) 90vw, 50vw"
             />
-            <span className="art-caption">STUDIO STUDY / 03</span>
+            <AssetImage name="studio-interior-alt" className="about-inset" />
+            <span className="art-caption">KI-KONZEPT / AI CONCEPT</span>
           </div>
           <div className="about-copy">
             <p className="eyebrow">02 / THE PHILOSOPHY</p>
@@ -441,6 +315,7 @@ export default function StudioHome() {
           </div>
         </div>
       </section>
+      <StudioExperience />
       <section className="section site-wrap" id="results">
         <div className="section-top">
           <SectionTitle
@@ -535,6 +410,11 @@ export default function StudioHome() {
         </div>
       </section>
       <section className="contact-section" id="contact">
+        <div className="site-wrap contact-visual">
+          <AssetImage name="studio-exterior" />
+          <AssetImage name="gallery-facade" />
+          <ImageCreditNotice />
+        </div>
         <div className="site-wrap contact-grid">
           <div>
             <p className="eyebrow">07 / SAY SERVUS</p>

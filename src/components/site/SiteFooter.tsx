@@ -1,10 +1,14 @@
 "use client";
+import { ImageCreditNotice } from "./AssetMedia";
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 export default function SiteFooter() {
   const { t } = useLanguage();
   return (
     <footer className="site-footer">
+      <div className="site-wrap">
+        <ImageCreditNotice />
+      </div>
       <div className="site-wrap footer-top">
         <Link className="footer-logo" href="/">
           VIENNA CUTS.
