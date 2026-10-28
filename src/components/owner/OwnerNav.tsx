@@ -53,27 +53,31 @@ export default function OwnerNav() {
       className="owner-nav border-b border-border bg-white"
     >
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-        <div className="flex flex-wrap gap-2">
-          {links.map((link) => {
-            const active = pathname === link.href;
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-accent">
+            Studio workspace · Authorized owner
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {links.map((link) => {
+              const active = pathname === link.href;
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-                  active
-                    ? "bg-accent text-white"
-                    : "text-foreground hover:bg-stone-100"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+                    active
+                      ? "bg-accent text-white"
+                      : "text-foreground hover:bg-stone-100"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-
         <button
           type="button"
           onClick={() => void handleLogout()}
@@ -85,7 +89,10 @@ export default function OwnerNav() {
       </div>
 
       {error && (
-        <p role="alert" className="mx-auto max-w-6xl px-6 pb-4 text-sm text-red-700">
+        <p
+          role="alert"
+          className="mx-auto max-w-6xl px-6 pb-4 text-sm text-red-700"
+        >
           {error}
         </p>
       )}

@@ -7,7 +7,7 @@ export default function BookingPage() {
   return (
     <main id="main" className="py-24 md:py-32">
       <Container>
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-6xl">
           <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-accent">
             Vienna Cuts · {t("Online-Buchung", "Online booking")}
           </p>

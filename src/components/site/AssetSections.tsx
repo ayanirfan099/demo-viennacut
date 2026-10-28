@@ -1,4 +1,5 @@
 "use client";
+import { useCatalog } from "./useCatalog";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { galleryImages, imageAsset, type ImageName } from "@/lib/images";
@@ -74,8 +75,8 @@ export function Gallery({ compact = false }: { compact?: boolean }) {
                 dialog.current?.showModal();
               }}
               aria-label={t(
-                `Vergrößern: ${asset.alt_de}`,
-                `Enlarge: ${asset.alt_en}`,
+                `${String(index + 1).padStart(2, "0")} / Bild ansehen +: ${asset.alt_de}`,
+                `${String(index + 1).padStart(2, "0")} / View image +: ${asset.alt_en}`,
               )}
             >
               <AssetImage name={name} />
@@ -182,6 +183,7 @@ export function StyleConcepts() {
 }
 export function Team() {
   const { t } = useLanguage();
+  const { data, error, retry } = useCatalog();
   return (
     <>
       <p className="section-intro">
@@ -190,6 +192,34 @@ export function Team() {
           "Four faces of our style world. All portraits and profiles are fictional AI concepts. Find bookable barbers in the appointment calendar.",
         )}
       </p>
+      <div
+        className="bookable-team"
+        aria-label={t("Buchbares Team", "Bookable team")}
+      >
+        <h2>{t("Deine Barber im Kalender", "Your bookable barbers")}</h2>
+        {!data && !error && (
+          <p role="status">{t("Team wird geladen …", "Loading team …")}</p>
+        )}
+        {error && (
+          <p role="alert">
+            {t("Team ist gerade nicht erreichbar.", "Team is unavailable.")}{" "}
+            <button onClick={retry}>{t("Erneut versuchen", "Retry")}</button>
+          </p>
+        )}
+        {data?.barbers.map((barber) => (
+          <article key={barber.id}>
+            <div>
+              <h3>{barber.name}</h3>
+              <p>
+                {t("Im Demo-Kalender buchbar", "Bookable in the demo calendar")}
+              </p>
+            </div>
+            <Link className="button" href={`/book?barber=${barber.id}`}>
+              {t("Termin buchen", "Book appointment")} →
+            </Link>
+          </article>
+        ))}
+      </div>
       <div className="portrait-grid">
         {["Alex", "Lukas", "Emre", "David"].map((name, i) => (
           <article className="portrait-card" key={name}>
@@ -202,14 +232,14 @@ export function Team() {
                 0{i + 1} / {t("KI-Demoprofil", "AI demo profile")}
               </p>
               <h3>{name}</h3>
-              <Link
-                className="text-link"
-                href={name === "Alex" ? "/book?barber=barber-alex" : "/book"}
-              >
-                {name === "Alex"
-                  ? t("Termin bei Alex", "Book with Alex")
-                  : t("Buchbare Barber ansehen", "View bookable barbers")}{" "}
-                →
+              <p className="profile-status">
+                {t(
+                  "Fiktives Stilprofil · kein eigener Buchungseintrag",
+                  "Fictional style profile · not a separate booking entry",
+                )}
+              </p>
+              <Link className="text-link" href="/book">
+                {t("Buchbare Barber ansehen", "View bookable barbers")} →
               </Link>
             </div>
           </article>

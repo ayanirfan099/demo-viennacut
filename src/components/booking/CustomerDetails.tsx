@@ -1,6 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import {
+  validateCustomerFields,
+  type CustomerFieldErrors,
+} from "./customer-validation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLanguage } from "@/components/site/LanguageProvider";
 import { formatPrice } from "./booking-copy";
 import type { BookingSuccessResponse } from "@/lib/booking/api-types";
@@ -31,12 +35,18 @@ export default function CustomerDetails({
 }: Props) {
   const { language, t } = useLanguage();
   const [review, setReview] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<CustomerFieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
-  const [error, setError] = useState<"conflict" | "unknown" | null>(null);
+  const [error, setError] = useState<"conflict" | "invalid" | "unknown" | null>(
+    null,
+  );
   const [appointment, setAppointment] = useState<
     BookingSuccessResponse["appointment"] | null
   >(null);
+  useEffect(() => {
+    document.getElementById("details-heading")?.focus();
+  }, [review, appointment]);
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(language === "de" ? "de-AT" : "en-GB", {
       timeZone: "Europe/Vienna",
@@ -45,6 +55,17 @@ export default function CustomerDetails({
     }).format(new Date(value));
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const validationErrors = validateCustomerFields(customer);
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length) {
+      setReview(false);
+      requestAnimationFrame(() =>
+        document
+          .getElementById(`customer-${Object.keys(validationErrors)[0]}`)
+          ?.focus(),
+      );
+      return;
+    }
     if (!review) {
       setReview(true);
       return;
@@ -72,6 +93,10 @@ export default function CustomerDetails({
         setError("conflict");
         return;
       }
+      if (response.status === 400) {
+        setError("invalid");
+        return;
+      }
       if (!response.ok) throw Error("Booking failed");
       const data: BookingSuccessResponse = await response.json();
       if (
@@ -90,7 +115,7 @@ export default function CustomerDetails({
   }
   return (
     <section className="mt-10" aria-labelledby="details-heading">
-      <h2 id="details-heading" className="text-2xl font-semibold">
+      <h2 id="details-heading" tabIndex={-1} className="text-2xl font-semibold">
         {appointment
           ? t("Dein Termin ist gespeichert.", "Your appointment is saved.")
           : review
@@ -162,7 +187,7 @@ export default function CustomerDetails({
           </Link>
         </div>
       ) : (
-        <form onSubmit={submit} className="mt-8 space-y-5">
+        <form noValidate onSubmit={submit} className="mt-8 space-y-5">
           {!review ? (
             <>
               <div>
@@ -174,16 +199,36 @@ export default function CustomerDetails({
                 </label>
                 <input
                   id="customer-name"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={
+                    fieldErrors.name ? "customer-name-error" : undefined
+                  }
                   autoComplete="name"
                   required
                   maxLength={100}
                   minLength={2}
                   value={customer.name}
-                  onChange={(e) =>
-                    onCustomerChange({ ...customer, name: e.target.value })
-                  }
+                  onChange={(e) => {
+                    onCustomerChange({ ...customer, name: e.target.value });
+                    setFieldErrors((errors) => ({
+                      ...errors,
+                      name: undefined,
+                    }));
+                  }}
                   className="mt-2 w-full rounded-md border border-border bg-surface p-4"
                 />
+                {fieldErrors.name && (
+                  <p
+                    id="customer-name-error"
+                    role="alert"
+                    className="mt-2 text-sm text-red-700"
+                  >
+                    {t(
+                      "Bitte gib einen Namen mit 2–100 Zeichen ein.",
+                      "Enter a name with 2–100 characters.",
+                    )}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -194,16 +239,36 @@ export default function CustomerDetails({
                 </label>
                 <input
                   id="customer-email"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={
+                    fieldErrors.email ? "customer-email-error" : undefined
+                  }
                   type="email"
                   autoComplete="email"
                   required
                   maxLength={254}
                   value={customer.email}
-                  onChange={(e) =>
-                    onCustomerChange({ ...customer, email: e.target.value })
-                  }
+                  onChange={(e) => {
+                    onCustomerChange({ ...customer, email: e.target.value });
+                    setFieldErrors((errors) => ({
+                      ...errors,
+                      email: undefined,
+                    }));
+                  }}
                   className="mt-2 w-full rounded-md border border-border bg-surface p-4"
                 />
+                {fieldErrors.email && (
+                  <p
+                    id="customer-email-error"
+                    role="alert"
+                    className="mt-2 text-sm text-red-700"
+                  >
+                    {t(
+                      "Bitte gib eine gültige E-Mail-Adresse ein.",
+                      "Enter a valid email address.",
+                    )}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -214,15 +279,35 @@ export default function CustomerDetails({
                 </label>
                 <input
                   id="customer-phone"
+                  aria-invalid={Boolean(fieldErrors.phone)}
+                  aria-describedby={
+                    fieldErrors.phone ? "customer-phone-error" : undefined
+                  }
                   type="tel"
                   autoComplete="tel"
                   maxLength={30}
                   value={customer.phone}
-                  onChange={(e) =>
-                    onCustomerChange({ ...customer, phone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    onCustomerChange({ ...customer, phone: e.target.value });
+                    setFieldErrors((errors) => ({
+                      ...errors,
+                      phone: undefined,
+                    }));
+                  }}
                   className="mt-2 w-full rounded-md border border-border bg-surface p-4"
                 />
+                {fieldErrors.phone && (
+                  <p
+                    id="customer-phone-error"
+                    role="alert"
+                    className="mt-2 text-sm text-red-700"
+                  >
+                    {t(
+                      "Die Telefonnummer darf höchstens 30 Zeichen enthalten.",
+                      "Phone number must be 30 characters or fewer.",
+                    )}
+                  </p>
+                )}
               </div>
             </>
           ) : (
@@ -263,10 +348,15 @@ export default function CustomerDetails({
                     "Dieser Termin ist inzwischen vergeben. Bitte gehe zurück und wähle eine andere Zeit.",
                     "This appointment is no longer available. Please go back and choose another time.",
                   )
-                : t(
-                    "Die Buchung konnte nicht bestätigt werden. Bei einem Verbindungsabbruch kann die Anfrage bereits gespeichert sein. Bitte prüfe dies vor einer erneuten Buchung.",
-                    "The booking could not be confirmed. If the connection was interrupted, the request may already be saved. Please check before booking again.",
-                  )}
+                : error === "invalid"
+                  ? t(
+                      "Bitte prüfe deine Angaben und wähle einen Termin innerhalb der nächsten 90 Tage.",
+                      "Please check your details and choose an appointment within the next 90 days.",
+                    )
+                  : t(
+                      "Die Buchung konnte nicht bestätigt werden. Bei einem Verbindungsabbruch kann die Anfrage bereits gespeichert sein. Bitte prüfe dies vor einer erneuten Buchung.",
+                      "The booking could not be confirmed. If the connection was interrupted, the request may already be saved. Please check before booking again.",
+                    )}
             </p>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3">

@@ -132,3 +132,7 @@ The existing owner dashboard, appointment filters, list/calendar and authorized 
 - Reference-site access remains blocked by the environment HTTP proxy (403). No assets or copy from the reference were used.
 
 Validation for the image integration: ESLint (zero warnings), TypeScript, production build and all 234 existing tests passed. Chromium checked the homepage, services, team and results at 375px, 768px and 1440px. Every visible image decoded, all 39 original image URLs returned HTTP 200, responsive hero selection matched the viewport, and no horizontal overflow or browser exceptions were detected. Service preselection, team booking navigation, gallery arrow keys/Escape, and English AI disclosures passed. Screenshots and the local QA report are in ignored `.qa/images-*` and `.qa/image-results.json`.
+
+## Repair and demo polish
+
+See [the repair report](docs/repair-report.md) for the 28 October 2026 fixes and verification. Public services and bookable barbers now load the existing live catalog APIs, while marketing portraits remain explicitly fictional. `/about` and `/contact` provide dedicated studio pages. Booking retains selections and shows inline customer errors; owner status changes use an accessible confirmation modal. The report distinguishes verified browser behavior from the inaccessible video and documents the remaining idempotency/owner-language limitations.

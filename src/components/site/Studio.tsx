@@ -7,6 +7,7 @@ import { serviceImages } from "@/lib/images";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "./LanguageProvider";
+import { useCatalog } from "./useCatalog";
 import { demoServices } from "@/lib/catalog";
 export function SectionTitle({
   label,
@@ -28,6 +29,16 @@ export function SectionTitle({
 export function ServiceList({ preview = false }: { preview?: boolean }) {
   const { t, language } = useLanguage();
   const [category, setCategory] = useState("all");
+  const { data, error, retry } = useCatalog();
+  const services = (data?.services ?? []).map((service) => {
+    const copy = demoServices.find((s) => s.id === service.id);
+    return {
+      ...service,
+      category: copy?.category ?? "hair",
+      deName: copy?.deName ?? service.name,
+      deDescription: copy?.deDescription ?? service.description,
+    };
+  });
   return (
     <>
       <div
@@ -50,8 +61,24 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
             </button>
           ))}
       </div>
+      {!data && !error && (
+        <p role="status">
+          {t("Leistungen werden geladen …", "Loading treatments …")}
+        </p>
+      )}
+      {error && (
+        <p role="alert">
+          {t(
+            "Leistungen sind gerade nicht erreichbar.",
+            "Treatments are currently unavailable.",
+          )}{" "}
+          <button onClick={retry} className="text-link">
+            {t("Erneut versuchen", "Retry")}
+          </button>
+        </p>
+      )}
       <div className="service-list">
-        {demoServices
+        {services
           .filter((s) => category === "all" || s.category === category)
           .slice(0, preview ? 3 : undefined)
           .map((s, i) => (
@@ -61,13 +88,13 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
               key={s.id}
             >
               <AssetImage
-                name={serviceImages[s.id]}
+                name={serviceImages[s.id] ?? "service-grooming"}
                 className="service-photo"
               />
               <span className="service-index">0{i + 1}</span>
               <div>
                 <h3>{t(s.deName, s.name)}</h3>
-                <p>{t(s.deDescription, s.description)}</p>
+                <p>{t(s.deDescription ?? "", s.description ?? "")}</p>
                 <small>
                   {s.durationMinutes} min ·{" "}
                   {t("Beratung inklusive", "Consultation included")}
@@ -77,7 +104,7 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
                 {new Intl.NumberFormat(language === "de" ? "de-AT" : "en-AT", {
                   style: "currency",
                   currency: business.currency,
-                  maximumFractionDigits: 0,
+                  minimumFractionDigits: 2,
                 }).format(s.priceCents / 100)}
                 <span aria-hidden="true">
                   <svg
@@ -120,8 +147,8 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
       </div>
       <p className="fine-print">
         {t(
-          "Demopreise aus unserem zentralen Katalog. Für die Buchung gelten die aktuellen Daten im Buchungssystem.",
-          "Demo prices from our central catalog. Booking uses the current database catalog.",
+          "Aktuelle Preise und Dauer direkt aus unserem Buchungssystem.",
+          "Current prices and durations directly from our booking system.",
         )}
       </p>
     </>
