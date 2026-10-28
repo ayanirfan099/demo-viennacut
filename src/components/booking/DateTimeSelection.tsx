@@ -14,6 +14,7 @@ type Props = {
   initialDate: string;
   initialTime: string;
   onBack: () => void;
+  onSelectionChange: (date: string, startsAt: string) => void;
   onContinue: (date: string, startsAt: string, barberId: string) => void;
 };
 export default function DateTimeSelection({
@@ -23,9 +24,11 @@ export default function DateTimeSelection({
   initialDate,
   initialTime,
   onBack,
+  onSelectionChange,
   onContinue,
 }: Props) {
   const { t } = useLanguage();
+  const [calendarNow] = useState(() => new Date());
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialTime);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -82,16 +85,23 @@ export default function DateTimeSelection({
     month: "2-digit",
     day: "2-digit",
   })
-    .formatToParts(new Date())
+    .formatToParts(calendarNow)
     .reduce<Record<string, string>>((acc, p) => {
       acc[p.type] = p.value;
       return acc;
     }, {});
   const minDate = `${today.year}-${today.month}-${today.day}`;
+  const maxDate = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Vienna",
+  }).format(new Date(calendarNow.getTime() + 89 * 86400000));
   const selected = slots.find((s) => s.startsAt === time);
   return (
     <section className="mt-10" aria-labelledby="datetime-heading">
-      <h2 id="datetime-heading" className="text-2xl font-semibold">
+      <h2
+        id="datetime-heading"
+        tabIndex={-1}
+        className="text-2xl font-semibold"
+      >
         {t("Zeit für dich.", "Time for yourself.")}
       </h2>
       <p className="mt-2 text-muted">
@@ -110,9 +120,12 @@ export default function DateTimeSelection({
         id="appointment-date"
         type="date"
         min={minDate}
+        max={maxDate}
+        aria-describedby="booking-date-help"
         value={date}
         onChange={(e) => {
           setDate(e.target.value);
+          onSelectionChange(e.target.value, "");
           setTime("");
           setSlots([]);
           setError(false);
@@ -120,6 +133,12 @@ export default function DateTimeSelection({
         }}
         className="mt-3 w-full rounded-md border border-border bg-surface p-4 sm:max-w-xs"
       />
+      <p id="booking-date-help" className="mt-3 text-sm text-muted">
+        {t(
+          "Wähle einen Termin innerhalb der nächsten 90 Tage.",
+          "Choose an appointment within the next 90 days.",
+        )}
+      </p>
       {date && (
         <div className="mt-8">
           <h3 className="text-lg font-semibold">
@@ -163,7 +182,10 @@ export default function DateTimeSelection({
                 <button
                   key={slot.startsAt}
                   aria-pressed={time === slot.startsAt}
-                  onClick={() => setTime(slot.startsAt)}
+                  onClick={() => {
+                    setTime(slot.startsAt);
+                    onSelectionChange(date, slot.startsAt);
+                  }}
                   className={`rounded-md border px-3 py-4 text-sm ${time === slot.startsAt ? "border-accent bg-accent/10 font-semibold" : "border-border bg-surface hover:border-accent"}`}
                 >
                   {slot.localTime}
@@ -187,7 +209,14 @@ export default function DateTimeSelection({
           {t("Zurück", "Back")}
         </button>
         <button
-          disabled={!selected || !date || date < minDate || loading || error}
+          disabled={
+            !selected ||
+            !date ||
+            date < minDate ||
+            date > maxDate ||
+            loading ||
+            error
+          }
           onClick={() => {
             if (selected) onContinue(date, time, selected.barberId);
           }}

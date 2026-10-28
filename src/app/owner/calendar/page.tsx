@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppointmentStatusBadge from "@/components/owner/AppointmentStatusBadge";
 import OwnerGuard from "@/components/owner/OwnerGuard";
 import { OwnerApiError } from "@/lib/owner/api";
 import { getCalendarAppointments } from "@/lib/owner/calendar-data";
@@ -11,11 +12,7 @@ import {
   shiftViennaDate,
   formatCalendarHeading,
 } from "@/lib/owner/calendar-date";
-import {
-  formatViennaDateTime,
-  formatViennaTime,
-} from "@/lib/owner/date";
-
+import { formatViennaDateTime, formatViennaTime } from "@/lib/owner/date";
 
 function CalendarContent() {
   const router = useRouter();
@@ -84,6 +81,16 @@ function CalendarContent() {
     return () => controller.abort();
   }, [selectedDate, refreshKey, router]);
 
+  useEffect(() => {
+    const refresh = () => setRefreshKey((key) => key + 1);
+    window.addEventListener("owner-appointments-updated", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("owner-appointments-updated", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   function changeDate(date: string) {
     if (!date || date === selectedDate) return;
     setSelectedDate(date);
@@ -94,15 +101,13 @@ function CalendarContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
+    <main id="main" className="owner-workspace mx-auto max-w-6xl px-6 py-12">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">
           Vienna Cuts Management
         </p>
 
-        <h1 className="mt-3 text-3xl font-bold">
-          Appointment Calendar
-        </h1>
+        <h1 className="mt-3 text-3xl font-bold">Appointment Calendar</h1>
 
         <p className="mt-2 text-muted">
           Daily appointment schedule · Europe/Vienna
@@ -115,9 +120,7 @@ function CalendarContent() {
             <h2 className="text-xl font-semibold">
               {formatCalendarHeading(selectedDate)}
             </h2>
-            <p className="mt-1 text-sm text-muted">
-              Vienna local date
-            </p>
+            <p className="mt-1 text-sm text-muted">Vienna local date</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -200,9 +203,7 @@ function CalendarContent() {
           </div>
         ) : appointments.length === 0 ? (
           <div className="rounded-xl border border-border bg-white p-10 text-center">
-            <h2 className="text-lg font-semibold">
-              No appointments scheduled
-            </h2>
+            <h2 className="text-lg font-semibold">No appointments scheduled</h2>
             <p className="mt-2 text-muted">
               There are no appointments for this Vienna date.
             </p>
@@ -238,9 +239,7 @@ function CalendarContent() {
                       </p>
                     </div>
 
-                    <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold">
-                      {appointment.status.replace("_", " ")}
-                    </span>
+                    <AppointmentStatusBadge status={appointment.status} />
                   </div>
                 </button>
               ))}
@@ -255,9 +254,7 @@ function CalendarContent() {
           className="mt-8 rounded-xl border border-border bg-white p-6"
         >
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">
-              Appointment Details
-            </h2>
+            <h2 className="text-xl font-semibold">Appointment Details</h2>
 
             <button
               type="button"
@@ -292,22 +289,18 @@ function CalendarContent() {
 
             <div>
               <dt className="text-muted">Service</dt>
-              <dd className="mt-1">
-                {selectedAppointment.service.name}
-              </dd>
+              <dd className="mt-1">{selectedAppointment.service.name}</dd>
             </div>
 
             <div>
               <dt className="text-muted">Barber</dt>
-              <dd className="mt-1">
-                {selectedAppointment.barber.name}
-              </dd>
+              <dd className="mt-1">{selectedAppointment.barber.name}</dd>
             </div>
 
             <div>
               <dt className="text-muted">Status</dt>
               <dd className="mt-1">
-                {selectedAppointment.status.replace("_", " ")}
+                <AppointmentStatusBadge status={selectedAppointment.status} />
               </dd>
             </div>
 
@@ -334,9 +327,5 @@ function CalendarContent() {
 }
 
 export default function OwnerCalendarPage() {
-  return (
-    <OwnerGuard>
-      {() => <CalendarContent />}
-    </OwnerGuard>
-  );
+  return <OwnerGuard>{() => <CalendarContent />}</OwnerGuard>;
 }

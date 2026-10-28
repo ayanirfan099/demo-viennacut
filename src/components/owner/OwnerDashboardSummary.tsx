@@ -65,6 +65,16 @@ export default function OwnerDashboardSummary() {
     return () => controller.abort();
   }, [date, refreshKey, router]);
 
+  useEffect(() => {
+    const refresh = () => setRefreshKey((key) => key + 1);
+    window.addEventListener("owner-appointments-updated", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("owner-appointments-updated", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   const cards = [
     { label: "Total appointments", value: summary?.total },
     { label: "Pending", value: summary?.pending },
@@ -77,9 +87,7 @@ export default function OwnerDashboardSummary() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Today&apos;s Appointments</h2>
-          <p className="mt-1 text-sm text-muted">
-            Vienna date: {date}
-          </p>
+          <p className="mt-1 text-sm text-muted">Vienna date: {date}</p>
         </div>
 
         <button
@@ -102,11 +110,11 @@ export default function OwnerDashboardSummary() {
         {cards.map((card) => (
           <div
             key={card.label}
-            className="rounded-xl border border-border bg-white p-6"
+            className="rounded-xl border border-border border-t-4 border-t-accent bg-white p-6"
           >
             <p className="text-sm text-muted">{card.label}</p>
-            <p className="mt-3 text-3xl font-bold">
-              {loading || error ? "—" : card.value ?? 0}
+            <p className="mt-3 text-4xl font-semibold tabular-nums">
+              {loading || error ? "—" : (card.value ?? 0)}
             </p>
           </div>
         ))}
