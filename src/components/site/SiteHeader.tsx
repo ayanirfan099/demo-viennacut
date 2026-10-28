@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "./LanguageProvider";
 export default function SiteHeader() {
@@ -8,6 +8,7 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const path = usePathname();
+  const toggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const scroll = () => setScrolled(window.scrollY > 30);
     scroll();
@@ -18,9 +19,9 @@ export default function SiteHeader() {
     ["/services", "Leistungen", "Services"],
     ["/results", "Looks", "Results"],
     ["/team", "Team", "Team"],
-    ["/#about", "Studio", "About"],
+    ["/about", "Studio", "About"],
     ["/#reviews", "Stimmen", "Reviews"],
-    ["/#contact", "Kontakt", "Contact"],
+    ["/contact", "Kontakt", "Contact"],
   ];
   return (
     <header
@@ -41,7 +42,11 @@ export default function SiteHeader() {
           aria-label={t("Hauptnavigation", "Main navigation")}
         >
           {links.map(([url, de, en]) => (
-            <Link href={url} key={url}>
+            <Link
+              href={url}
+              key={url}
+              aria-current={path === url ? "page" : undefined}
+            >
               {t(de, en)}
             </Link>
           ))}
@@ -79,6 +84,7 @@ export default function SiteHeader() {
             </span>
           </Link>
           <button
+            ref={toggle}
             className="menu-toggle"
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -95,7 +101,10 @@ export default function SiteHeader() {
           className="mobile-nav"
           aria-label={t("Mobile Navigation", "Mobile navigation")}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Escape") {
+              setOpen(false);
+              toggle.current?.focus();
+            }
           }}
         >
           {links.map(([url, de, en]) => (
