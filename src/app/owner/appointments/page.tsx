@@ -206,7 +206,7 @@ function AppointmentsContent() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <main id="main" className="owner-workspace mx-auto max-w-6xl px-6 py-12">
+    <main lang="en" id="main" className="owner-workspace mx-auto max-w-6xl px-6 py-12">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Appointments</h1>

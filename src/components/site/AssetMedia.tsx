@@ -33,7 +33,7 @@ export function HeroMedia() {
     width: desktop.width,
     height: desktop.height,
     alt: t(desktop.alt_de, desktop.alt_en),
-    sizes: "100vw",
+    sizes: "(max-width: 820px) 100vw, 48vw",
     loading: "eager",
     fetchPriority: "high",
   });
@@ -42,13 +42,17 @@ export function HeroMedia() {
     width: mobile.width,
     height: mobile.height,
     alt: t(mobile.alt_de, mobile.alt_en),
-    sizes: "100vw",
+    sizes: "(max-width: 820px) 100vw, 48vw",
     loading: "eager",
     fetchPriority: "high",
   });
   return (
     <picture className="hero-picture">
-      <source media="(min-width: 701px)" srcSet={desk.srcSet} sizes="100vw" />
+      <source
+        media="(min-width: 821px)"
+        srcSet={desk.srcSet}
+        sizes="(max-width: 820px) 100vw, 48vw"
+      />
       {/* Native img is required for art-directed picture sources. */}
       <img {...mob} alt={mob.alt} />
     </picture>

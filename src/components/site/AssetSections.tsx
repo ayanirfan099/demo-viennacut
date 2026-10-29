@@ -63,7 +63,9 @@ export function Gallery({ compact = false }: { compact?: boolean }) {
           ))}
         </div>
       )}
-      <div className="photo-gallery">
+      <div
+        className={`photo-gallery ${compact ? "photo-gallery-editorial" : ""}`}
+      >
         {images.map((name, index) => {
           const asset = imageAsset(name);
           return (
@@ -144,7 +146,7 @@ export function StyleConcepts() {
   const { t } = useLanguage();
   return (
     <section className="style-concepts">
-      <p className="eyebrow">STYLE STUDIES</p>
+      <p className="eyebrow">{t("STILSTUDIEN", "STYLE STUDIES")}</p>
       <h2>
         {t("Zwei Ideen. Ein neuer Blick.", "Two ideas. A new perspective.")}
       </h2>
@@ -253,7 +255,9 @@ export function StudioExperience() {
   return (
     <section className="experience-section">
       <div className="site-wrap">
-        <p className="eyebrow">THE ART OF SLOWING DOWN</p>
+        <p className="eyebrow">
+          {t("DIE KUNST DER GELASSENHEIT", "THE ART OF SLOWING DOWN")}
+        </p>
         <h2>
           {t("Ankommen. Durchatmen.", "Arrive. Exhale.")}
           <br />

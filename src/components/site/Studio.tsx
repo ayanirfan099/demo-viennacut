@@ -77,7 +77,7 @@ export function ServiceList({ preview = false }: { preview?: boolean }) {
           </button>
         </p>
       )}
-      <div className="service-list">
+      <div className={`service-list ${preview ? "service-list-preview" : ""}`}>
         {services
           .filter((s) => category === "all" || s.category === category)
           .slice(0, preview ? 3 : undefined)
@@ -182,8 +182,8 @@ export function FinalCTA() {
         </Link>
         <p className="fine-print">
           {t(
-            "Demo-Buchungen werden in der lokalen Demo-Datenbank gespeichert.",
-            "Demo appointments are stored in the local demo database.",
+            "Demo-Termine werden gespeichert. Bitte nur Testdaten verwenden.",
+            "Demo appointments are saved. Please use test details only.",
           )}
         </p>
       </div>
@@ -195,55 +195,63 @@ export default function StudioHome() {
   return (
     <main id="main">
       <section className="hero">
-        <div className="hero-art">
-          <HeroMedia />
-        </div>
-        <div className="site-wrap hero-content">
-          <p className="eyebrow">
-            <span className="tiny-line" /> WIEN · BARBER CULTURE
-          </p>
-          <h1>
-            {t("Dein Stil.", "Your style.")}
-            <br />
-            {t("Unser", "Our")}
-            <br />
-            <em>{t("Handwerk.", "craft.")}</em>
-          </h1>
-          <p className="hero-description">
-            {t(
-              "Klare Linien. Charakter. Ein Moment nur für dich. Entdecke moderne Barberkultur mit Wiener Gelassenheit.",
-              "Clean lines. Character. A moment just for you. Discover modern barber culture with a little Viennese ease.",
-            )}
-          </p>
-          <div className="hero-buttons">
-            <Link href="/book" className="button">
-              {t("Termin buchen", "Book now")}{" "}
-              <svg
-                aria-hidden="true"
-                className="arrow-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M5 19 19 5M5 5h14v14" />
-              </svg>
-            </Link>
-            <Link href="/services" className="text-link">
-              {t("Leistungen entdecken", "Explore treatments")} ↓
-            </Link>
-          </div>
-          <div className="hero-foot">
-            <span>01 / VIENNA CUTS</span>
-            <span>
+        <div className="site-wrap atelier-hero-grid">
+          <div className="atelier-hero-copy">
+            <p className="eyebrow">
+              <span className="tiny-line" /> WIEN / BARBER CULTURE
+            </p>
+            <h1>
+              {t("Die Kunst,", "The art of")}
+              <br />
+              {t("du selbst", "looking")}
+              <br />
+              <em>{t("zu sein.", "like yourself.")}</em>
+            </h1>
+            <p className="hero-description">
               {t(
-                "FIKTIVES STUDIO · KI-GENERIERTE BILDER",
-                "FICTIONAL STUDIO · AI-GENERATED IMAGERY",
+                "Präzise Schnitte. Zeit zum Abschalten. Ein neues Alltagsritual — als Studiokonzept in Wien.",
+                "Considered cuts. Unhurried moments. A new everyday ritual, imagined in Vienna.",
               )}
-            </span>
+            </p>
+            <div className="hero-buttons">
+              <Link href="/book" className="button">
+                {t("Termin buchen", "Book a chair")}{" "}
+                <span aria-hidden="true">↗</span>
+              </Link>
+              <Link href="/services" className="text-link">
+                {t("Leistungen entdecken", "Explore treatments")} →
+              </Link>
+            </div>
+            <a className="hero-scroll" href="#services">
+              {t("MEHR ENTDECKEN", "SCROLL TO EXPLORE")}{" "}
+              <span aria-hidden="true">↓</span>
+            </a>
           </div>
+          <div className="atelier-hero-image">
+            <HeroMedia />
+            <span className="hero-sideword">
+              VIENNA CUTS / EDITORIAL ATELIER
+            </span>
+            <div className="hero-detail">
+              <AssetImage name="gallery-scissors" sizes="110px" />
+              <div>
+                <span>01 / {t("DAS DETAIL", "THE DETAIL")}</span>
+                <strong>
+                  {t("Handwerk mit Haltung.", "Craft with character.")}
+                </strong>
+                <span>{t("KI-BILDKONZEPT", "AI IMAGE CONCEPT")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="site-wrap hero-foot">
+          <span>EST. AS AN IDEA / VIENNA CUTS</span>
+          <span>
+            {t(
+              "FIKTIVES STUDIO · KI-GENERIERTE BILDER",
+              "FICTIONAL STUDIO · AI-GENERATED IMAGERY",
+            )}
+          </span>
         </div>
       </section>
       <div className="values-strip">
@@ -261,9 +269,9 @@ export default function StudioHome() {
       <section className="section site-wrap" id="services">
         <div className="section-top">
           <SectionTitle
-            label="01 / THE MENU"
-            de="Guter Stil. Klare Preise."
-            en="Good style. Clear prices."
+            label={t("01 / UNSER ANGEBOT", "01 / THE MENU")}
+            de="Guter Stil braucht Präzision."
+            en="Good things take precision."
           />
           <Link className="text-link" href="/services">
             {t("Alle Leistungen", "All treatments")}{" "}
@@ -379,21 +387,18 @@ export default function StudioHome() {
       <section className="review-section" id="reviews">
         <div className="site-wrap">
           <p className="eyebrow">
-            05 / {t("FIKTIVE DEMOSTIMMEN", "FICTIONAL DEMO TESTIMONIALS")}
+            05 / {t("UNSER GEDANKE", "OUR POINT OF VIEW")}
           </p>
-          <blockquote>
-            “
+          <p className="brand-statement">
             {t(
-              "Ein guter Schnitt. Ein ruhiger Moment. Genau das, was ich gebraucht habe.",
-              "A good cut. A quiet moment. Just what I needed.",
+              "Ein guter Schnitt verändert nicht, wer du bist. Er unterstreicht es.",
+              "A good cut doesn’t change who you are. It brings it into focus.",
             )}
-            ”
-          </blockquote>
+          </p>
           <p>
-            —{" "}
             {t(
-              "Lukas · erfundene Beispielstimme, keine echte Bewertung",
-              "Lukas · fictional example, not a real review",
+              "Die Idee hinter Vienna Cuts · keine Kundenbewertung",
+              "The idea behind Vienna Cuts · not a customer review",
             )}
           </p>
         </div>

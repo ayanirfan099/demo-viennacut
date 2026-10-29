@@ -12,29 +12,32 @@ export const metadata: Metadata = {
 
 export default function OwnerLoginPage() {
   return (
-    <main className="flex min-h-[75vh] items-center justify-center px-6 py-16">
-      <section
-        aria-labelledby="owner-login-title"
-        className="w-full max-w-md rounded-xl border border-border bg-surface p-8 shadow-sm sm:p-10"
-      >
-        <div className="mb-8 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-accent">
-            Vienna Cuts
+    <main lang="en" id="main" className="owner-login">
+      <aside className="owner-login-story" aria-label="Studio workspace">
+        <p className="eyebrow">VIENNA CUTS / OWNER WORKSPACE</p>
+        <div>
+          <p className="owner-login-headline">
+            Behind the craft.
+            <br />
+            <em>In control.</em>
           </p>
-
-          <h1
-            id="owner-login-title"
-            className="text-3xl font-bold tracking-tight"
-          >
-            Owner Login
-          </h1>
-
-          <p className="mt-3 text-sm text-muted">
-            Sign in to manage your barbershop appointments.
+          <p>
+            A considered space for your studio’s day. Appointments, people and
+            the details that matter.
           </p>
         </div>
-
+        <p className="eyebrow">PRIVATE ACCESS / FICTIONAL DEMO STUDIO</p>
+      </aside>
+      <section aria-labelledby="owner-login-title" className="owner-login-card">
+        <p className="eyebrow">WELCOME BACK</p>
+        <h1 id="owner-login-title">Owner Login</h1>
+        <p className="page-deck">
+          Sign in to manage your barbershop appointments.
+        </p>
         <OwnerLoginForm />
+        <p className="fine-print">
+          Access is restricted to authorized studio owners.
+        </p>
       </section>
     </main>
   );

@@ -5,7 +5,7 @@ import { useLanguage } from "@/components/site/LanguageProvider";
 export default function BookingPage() {
   const { t } = useLanguage();
   return (
-    <main id="main" className="py-24 md:py-32">
+    <main id="main" className="booking-page py-24 md:py-32">
       <Container>
         <div className="mx-auto max-w-6xl">
           <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-accent">

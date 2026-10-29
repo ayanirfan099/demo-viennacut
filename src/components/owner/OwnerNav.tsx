@@ -49,6 +49,7 @@ export default function OwnerNav() {
 
   return (
     <nav
+      lang="en"
       aria-label="Owner navigation"
       className="owner-nav border-b border-border bg-white"
     >
