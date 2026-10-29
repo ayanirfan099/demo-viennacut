@@ -9,6 +9,24 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const path = usePathname();
   const toggle = useRef<HTMLButtonElement>(null);
+  const drawer = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = drawer.current;
+    if (!element) return;
+    if (open) element.showModal();
+    else if (element.open) element.close();
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const resize = () => {
+      if (window.innerWidth > 1100) setOpen(false);
+    };
+    window.addEventListener("resize", resize);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("resize", resize);
+    };
+  }, [open]);
   useEffect(() => {
     const scroll = () => setScrolled(window.scrollY > 30);
     scroll();
@@ -20,7 +38,7 @@ export default function SiteHeader() {
     ["/results", "Looks", "Results"],
     ["/team", "Team", "Team"],
     ["/about", "Studio", "About"],
-    ["/#reviews", "Stimmen", "Reviews"],
+    ["/#reviews", "Haltung", "Our approach"],
     ["/contact", "Kontakt", "Contact"],
   ];
   return (
@@ -95,39 +113,57 @@ export default function SiteHeader() {
           </button>
         </div>
       </div>
-      {open && (
+      <dialog
+        ref={drawer}
+        id="mobile-menu"
+        className="mobile-drawer"
+        aria-label={t("Mobile Navigation", "Mobile navigation")}
+        onCancel={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false);
+          toggle.current?.focus();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setOpen(false);
+        }}
+      >
+        <div className="drawer-top">
+          <span>VIENNA CUTS / MENU</span>
+          <button
+            autoFocus
+            aria-label={t("Menü schließen", "Close menu")}
+            onClick={() => setOpen(false)}
+          >
+            ×
+          </button>
+        </div>
         <nav
-          id="mobile-menu"
           className="mobile-nav"
           aria-label={t("Mobile Navigation", "Mobile navigation")}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setOpen(false);
-              toggle.current?.focus();
-            }
-          }}
         >
-          {links.map(([url, de, en]) => (
-            <Link onClick={() => setOpen(false)} href={url} key={url}>
-              {t(de, en)}{" "}
-              <span>
-                <svg
-                  aria-hidden="true"
-                  className="arrow-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M5 19 19 5M5 5h14v14" />
-                </svg>
-              </span>
+          {links.map(([url, de, en], i) => (
+            <Link
+              onClick={() => setOpen(false)}
+              href={url}
+              key={url}
+              aria-current={path === url ? "page" : undefined}
+            >
+              <small aria-hidden="true">0{i + 1}</small>
+              {t(de, en)}
+              <span aria-hidden="true">↗</span>
             </Link>
           ))}
+          <Link className="button" href="/book" onClick={() => setOpen(false)}>
+            {t("Termin buchen", "Book a chair")} →
+          </Link>
         </nav>
-      )}
+        <p className="drawer-note">
+          {t(
+            "Ein fiktives Studio. Zeit für deinen Stil.",
+            "An imagined studio. Time for your style.",
+          )}
+        </p>
+      </dialog>
     </header>
   );
 }

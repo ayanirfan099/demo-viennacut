@@ -136,3 +136,9 @@ Validation for the image integration: ESLint (zero warnings), TypeScript, produc
 ## Repair and demo polish
 
 See [the repair report](docs/repair-report.md) for the 28 October 2026 fixes and verification. Public services and bookable barbers now load the existing live catalog APIs, while marketing portraits remain explicitly fictional. `/about` and `/contact` provide dedicated studio pages. Booking retains selections and shows inline customer errors; owner status changes use an accessible confirmation modal. The report distinguishes verified browser behavior from the inaccessible video and documents the remaining idempotency/owner-language limitations.
+
+## Editorial Atelier redesign — 29 October 2026
+
+The MagicPath prototype now supplies the shared visual direction: evergreen charcoal, ivory, copper, self-hosted DM Sans/DM Serif Display, an editorial split hero and asymmetric photography. The public site, real booking flow and authorized owner workspace use the existing Next.js application and PostgreSQL/Better Auth backend. The prototype's simulated booking/owner state and screenshot crops were not imported.
+
+See [implementation and verification notes](docs/editorial-atelier-implementation.md) for source provenance, changed components, route coverage, test results and remaining demo limitations. The original 39-image pack remains unchanged, with fictional-image disclosures. No deployment is included.

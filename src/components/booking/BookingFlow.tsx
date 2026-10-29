@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ApiService, ApiBarber } from "@/lib/booking/api-types";
 import { useLanguage } from "@/components/site/LanguageProvider";
 import { formatPrice, serviceCopy } from "./booking-copy";
+import { AssetImage } from "@/components/site/AssetMedia";
+import { serviceImages } from "@/lib/images";
 import DateTimeSelection from "./DateTimeSelection";
 import CustomerDetails, { type Customer } from "./CustomerDetails";
 
@@ -98,12 +100,12 @@ export default function BookingFlow() {
   const button =
     "rounded-md bg-foreground px-7 py-3 font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed";
   const card =
-    "w-full rounded-lg border bg-surface p-5 text-left transition-colors sm:p-6";
+    "booking-choice w-full border bg-surface p-5 text-left transition-colors sm:p-6";
   return (
-    <div className="mt-10">
+    <div className="booking-flow mt-10">
       <ol
         aria-label={t("Buchungsfortschritt", "Booking progress")}
-        className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-surface p-3 sm:grid-cols-4"
+        className="booking-stepper"
       >
         {steps.map((label, i) => (
           <li
@@ -111,13 +113,15 @@ export default function BookingFlow() {
             aria-current={step === i ? "step" : undefined}
             className={`border-b-2 px-2 py-4 text-sm ${step === i ? "border-accent font-semibold" : "border-border text-muted"}`}
           >
-            <span className="mr-2">0{i + 1}</span>
+            <span className="step-number" aria-hidden="true">
+              {i < step ? "✓" : `0${i + 1}`}
+            </span>
             {label}
           </li>
         ))}
       </ol>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-        <div>
+      <div className="booking-layout">
+        <div className="booking-panel">
           {loading && (
             <p role="status" className="py-10 text-muted">
               {t(
@@ -183,6 +187,11 @@ export default function BookingFlow() {
                           }}
                           className={`${card} ${serviceId === s.id ? "border-accent ring-1 ring-accent" : "border-border hover:border-accent"}`}
                         >
+                          <AssetImage
+                            name={serviceImages[s.id] ?? "service-grooming"}
+                            className="booking-choice-photo"
+                            sizes="80px"
+                          />
                           <div className="flex justify-between gap-4">
                             <h3 className="text-lg font-semibold">
                               {copy.name}
@@ -249,6 +258,9 @@ export default function BookingFlow() {
                           }
                         }}
                       >
+                        <span className="barber-initial" aria-hidden="true">
+                          {b.id === "any" ? "✳" : b.name.charAt(0)}
+                        </span>
                         <span className="text-lg font-semibold">{b.name}</span>
                         <p className="mt-2 text-sm text-muted">
                           {b.id === "any"
@@ -329,7 +341,7 @@ export default function BookingFlow() {
         </div>
         <aside
           aria-label={t("Terminübersicht", "Appointment summary")}
-          className="mt-10 rounded-lg border border-border bg-surface p-6 lg:sticky lg:top-32"
+          className="booking-summary"
         >
           <p className="text-xs font-semibold uppercase tracking-widest text-accent">
             {t("Deine Auswahl", "Your selection")}
@@ -339,6 +351,15 @@ export default function BookingFlow() {
               ? serviceCopy(service, language).name
               : t("Dein nächster Termin", "Your next appointment")}
           </h2>
+          <AssetImage
+            name={
+              service
+                ? (serviceImages[service.id] ?? "service-grooming")
+                : "gallery-tools"
+            }
+            className="summary-photo"
+            sizes="300px"
+          />
           <dl className="mt-6 space-y-5 text-sm">
             <div>
               <dt className="text-muted">{t("Barber", "Barber")}</dt>

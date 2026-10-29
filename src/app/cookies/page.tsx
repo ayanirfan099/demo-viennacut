@@ -4,7 +4,7 @@ import { useLanguage } from "@/components/site/LanguageProvider";
 export default function CookiesPage() {
   const { t } = useLanguage();
   return (
-    <main id="main" className="mx-auto max-w-3xl px-6 pb-24 pt-40">
+    <main id="main" className="mx-auto max-w-3xl px-6 pb-24 pt-20">
       <p className="text-sm uppercase tracking-[.2em] text-muted">
         Vienna Cuts · Demo
       </p>

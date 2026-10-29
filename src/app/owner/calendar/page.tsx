@@ -101,7 +101,7 @@ function CalendarContent() {
   }
 
   return (
-    <main id="main" className="owner-workspace mx-auto max-w-6xl px-6 py-12">
+    <main lang="en" id="main" className="owner-workspace mx-auto max-w-6xl px-6 py-12">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">
           Vienna Cuts Management

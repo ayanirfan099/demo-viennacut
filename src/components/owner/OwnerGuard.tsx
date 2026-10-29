@@ -29,18 +29,12 @@ export default function OwnerGuard({ children }: OwnerGuardProps) {
       } catch (caught) {
         if (!active) return;
 
-        if (
-          caught instanceof OwnerApiError &&
-          caught.status === 401
-        ) {
+        if (caught instanceof OwnerApiError && caught.status === 401) {
           router.replace("/owner/login");
           return;
         }
 
-        if (
-          caught instanceof OwnerApiError &&
-          caught.status === 403
-        ) {
+        if (caught instanceof OwnerApiError && caught.status === 403) {
           setError("Your account does not have owner permissions.");
         } else {
           setError("Unable to verify your session. Please try again.");
@@ -59,7 +53,11 @@ export default function OwnerGuard({ children }: OwnerGuardProps) {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-16">
+      <main
+        lang="en"
+        id="main"
+        className="owner-workspace mx-auto max-w-6xl px-6 py-16"
+      >
         <p role="status" className="text-muted">
           Verifying owner session...
         </p>
@@ -69,8 +67,15 @@ export default function OwnerGuard({ children }: OwnerGuardProps) {
 
   if (error) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-16">
-        <div role="alert" className="rounded-lg border border-border bg-white p-6">
+      <main
+        lang="en"
+        id="main"
+        className="owner-workspace mx-auto max-w-6xl px-6 py-16"
+      >
+        <div
+          role="alert"
+          className="rounded-lg border border-border bg-white p-6"
+        >
           <h1 className="text-xl font-semibold">Access unavailable</h1>
           <p className="mt-2 text-muted">{error}</p>
           <button

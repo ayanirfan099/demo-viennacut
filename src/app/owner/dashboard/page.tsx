@@ -8,29 +8,27 @@ export default function OwnerDashboardPage() {
   return (
     <OwnerGuard>
       {(owner) => (
-        <main className="mx-auto max-w-6xl px-6 py-12">
+        <main
+          lang="en"
+          id="main"
+          className="owner-workspace mx-auto max-w-6xl px-6 py-12"
+        >
           <div className="mb-10">
             <p className="text-sm font-semibold uppercase tracking-widest text-accent">
               Vienna Cuts Management
             </p>
-            <h1 className="mt-3 text-3xl font-bold">
-              Owner Dashboard
-            </h1>
-            <p className="mt-2 text-muted">
-              Signed in as {owner.email}
-            </p>
+            <h1 className="mt-3 text-3xl font-bold">Owner Dashboard</h1>
+            <p className="mt-2 text-muted">Signed in as {owner.email}</p>
           </div>
 
           <OwnerDashboardSummary />
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="owner-shortcuts grid gap-6 md:grid-cols-2">
             <Link
               href="/owner/appointments"
               className="rounded-xl border border-border bg-white p-8 transition hover:border-accent"
             >
-              <h2 className="text-xl font-semibold">
-                Appointments
-              </h2>
+              <h2 className="text-xl font-semibold">Appointments</h2>
               <p className="mt-3 text-muted">
                 Review bookings, filter appointments, and manage their status.
               </p>
@@ -43,9 +41,7 @@ export default function OwnerDashboardPage() {
               href="/owner/calendar"
               className="rounded-xl border border-border bg-white p-8 transition hover:border-accent"
             >
-              <h2 className="text-xl font-semibold">
-                Calendar
-              </h2>
+              <h2 className="text-xl font-semibold">Calendar</h2>
               <p className="mt-3 text-muted">
                 View appointments by date using Vienna local time.
               </p>
