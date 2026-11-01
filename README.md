@@ -1,4 +1,4 @@
-# Vienna Cuts
+# Vienna Cuts — Full-Stack Booking Demo
 
 A fictional Vienna barbershop demo built in the existing `demo-viennacut` application. German is the primary customer language; the language switcher supports English. Sample identities, illustrations, testimonials and business information are demonstration content, not verified claims about a real shop.
 
